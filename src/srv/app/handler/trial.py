@@ -2,8 +2,9 @@ import re
 import sqlite3
 import statistics
 
-from bottle import abort, get, post, put, request, response
+from bottle import abort, request, response
 
+from app import dashboard
 from app.data.db import sqlite as db
 from app.data.file import DataFileBank, Last
 
@@ -90,7 +91,7 @@ def build_where_clause():
     return (where, args)
 
 
-@get('/dashboard/trial/')
+@dashboard.get('/trial/')
 def list_trials():
     (where, args) = build_where_clause()
 
@@ -112,7 +113,7 @@ def list_trials():
     }
 
 
-@get('/dashboard/trial/stats')
+@dashboard.get('/trial/stats')
 def stat_trials():
     recent_limit = 10 if (limit_value := clean_limit()) is None else limit_value
     if not 0 <= recent_limit <= 1000:
@@ -190,7 +191,7 @@ def stat_trials():
     }
 
 
-@post('/dashboard/trial/')
+@dashboard.post('/trial/')
 def create_trial():
     if request.forms:
         raise NotImplementedError
@@ -224,7 +225,7 @@ def create_trial():
     }
 
 
-@put('/dashboard/trial/<ts:int>')
+@dashboard.put('/trial/<ts:int>')
 def upsert_trial(ts):
     try:
         values = [int(arg) for arg in (request.forms.size,

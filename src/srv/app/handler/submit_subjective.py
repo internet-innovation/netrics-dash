@@ -1,12 +1,13 @@
-from bottle import abort, request, route
+from bottle import abort, request
 
+from app import dashboard
 from app.data.db import sqlite as db
 
 
 PERF_LABELS = ('good', 'slow', 'unusable')
 
 
-@route('/dashboard/survey/', method='POST')
+@dashboard.post('/survey/')
 def handle_survey():
     subj_label = request.forms.get('subjective')
 

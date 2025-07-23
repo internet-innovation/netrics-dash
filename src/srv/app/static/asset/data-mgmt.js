@@ -141,7 +141,7 @@ const ispStats = (() => {
 
     // Latency
     elem = document.getElementById("latency")
-    pardiv = elem.parentElement
+    pardiv = elem.parentElement.parentElement
 
     const latencyReceived = data["latency"] !== null
 
@@ -407,6 +407,10 @@ const networkStats = {
     )
   },
   async load (ispRequest) {
+    if (! panelConf.networkStats?.enabled) {
+      return false;
+    }
+
     const networkData = await $.getJSON('trial/stats')
     const ispData = await ispRequest
 
@@ -522,6 +526,14 @@ const extWatcher = {
 }
 
 if (extWatcher.canInstall()) extWatcher.start()
+
+if (typeof panelConf === 'undefined') {
+      panelConf = {
+          networkStats: {
+              enabled: true
+          }
+      };
+}
 
 ispStats.load()
 

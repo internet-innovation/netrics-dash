@@ -1,15 +1,15 @@
 # syntax=docker/dockerfile:1
-FROM python:3.9-alpine3.17
-# Starting with 3.14 features sqlite3.35 and "returning" clause
+FROM python:3.13-alpine3.22
+# Starting with alpine3.14 features sqlite3.35 and "returning" clause
 
 # Builds intended for deployment should specify the software
 # version via "APPVERSION".
 ARG APPVERSION
 ARG APPNAME=dashboard
-ARG FATEVERSION=0.1.0rc2
+ARG FATEVERSION=1.1.0
 
 # Label "version" may be incremented upon changing this file.
-LABEL version="3"                \
+LABEL version="4"                \
       appname="$APPNAME"         \
       appversion="$APPVERSION"   \
       fateversion="$FATEVERSION"
@@ -36,6 +36,10 @@ RUN <<-EOF
 	mkdir -p /var/lib/"$APPNAME"
 	chown "$APPNAME" /var/lib/"$APPNAME"
 	chmod ug+rwx /var/lib/"$APPNAME"
+
+	mkdir -p /var/cache/"$APPNAME"
+	chown "$APPNAME" /var/cache/"$APPNAME"
+	chmod ug+rwx /var/cache/"$APPNAME"
 EOF
 
 WORKDIR /usr/src/"$APPNAME"
@@ -58,16 +62,27 @@ ENV FATE_PREFIX_PROFILE="system"
 
 COPY etc/fate /etc/fate
 
-RUN <<-EOF
+RUN <<-INSTALL-FATE
+	#
+	# install fate-scheduler (within a virtual environment)
+	#
 	set -ex
 
 	python -m venv /usr/local/lib/fate
+
+	# fate requires lmdb
+	# rather than attempt to compile the lmdb-python extension (under alpine),
+	# or use its included lmdb, or patch lmdb ...
+	# we'll just instruct it to use a system-installed lmdb via cffi.
+	apk add --no-cache py3-cffi lmdb
+
+	export LMDB_FORCE_SYSTEM=1 LMDB_FORCE_CFFI=1 LMDB_PURE=1
 
 	/usr/local/lib/fate/bin/pip install --no-cache-dir fate-scheduler=="$FATEVERSION"
 
 	# (note: busybox ln doesn't appear to support -t as expected)
 	ln -s /usr/local/lib/fate/bin/fate* /usr/local/bin
-EOF
+INSTALL-FATE
 
 # Create conventional interface convenience scripts.
 #

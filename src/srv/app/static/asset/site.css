@@ -88,18 +88,19 @@ ul.dropdown-menu>li {
     border-color: #0a58ca;
 }
 
+.dashboard {
+  padding-top: 35px;
+}
+
 .dashrow {
   padding-bottom: 35px;
-}
-.dashrow-top {
-  margin-top: 35px;
 }
 
 .dashval {
   float: right;
 
   display: inline-block;
-  margin: 0px 20px;
+  margin: 45px 20px;
 
   border-radius: 20px;
   padding: 18px;
@@ -107,6 +108,11 @@ ul.dropdown-menu>li {
 
   width: 100%;
   max-width: 315px;
+  min-height: 150px;
+}
+
+.dashval * {
+  vertical-align: sub;
 }
 
 .btn-test {
@@ -262,7 +268,7 @@ ul.dropdown-menu>li {
   border-top: 10px solid rgba(0, 0, 0, 0.5);
   width: 40px;
   height: 40px;
-  margin: 3px auto;
+  margin: 15px auto;
   -webkit-animation: spin 2s linear infinite; /* Safari */
   animation: spin 3s linear infinite;
 }

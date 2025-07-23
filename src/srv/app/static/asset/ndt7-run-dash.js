@@ -298,5 +298,13 @@ const ndt7btn = {
   },
 }
 
-ndt7run.run_download()
-.finally(() => ndt7btn.initBtn())
+if (typeof ndt7conf === 'undefined') {
+      ndt7conf = {
+          enabled: true
+      };
+}
+
+if (ndt7conf.enabled) {
+  ndt7run.run_download()
+  .finally(() => ndt7btn.initBtn())
+}

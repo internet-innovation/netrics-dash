@@ -1,1 +1,1 @@
-from .run import APP_PATH, config, main
+from .run import dashboard, main  # noqa: F401
