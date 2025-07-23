@@ -3,32 +3,39 @@
 
 <head>
 
-  <title>Home Network Dashboard</title>
+  <title>Home Internet Dashboard</title>
 
-  <link rel="icon" type="image/svg+xml" href="/dashboard/asset/img/wifi.svg">
+  <link rel="icon" type="image/svg+xml" href="/static/img/wifi.svg">
 
   <meta charset='utf-8' name="viewport" content="width=device-width, initial-scale=1">
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.0/font/bootstrap-icons.css">
+  <!-- bootstrap@5.0.0-beta3 -->
+  <link rel="stylesheet" href="/static/vendor/css/bootstrap.min.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- bootstrap-icons@1.7.0 -->
+  <link rel="stylesheet" href="/static/vendor/css/bootstrap-icons.css">
 
-  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+  <!-- @popperjs/core@2.9.1 -->
+  <script type="text/javascript" src="/static/vendor/js/popper.min.js"></script>
 
-  <link rel="stylesheet" href="/dashboard/asset/site.css">
+  <!-- bootstrap@5.0.0-beta3 -->
+  <script type="text/javascript" src="/static/vendor/js/bootstrap.min.js"></script>
+
+  <script type="text/javascript" src="/static/vendor/js/jquery-3.6.0.min.js"></script>
+
+  <script type="text/javascript" src="/static/vendor/js/plotly-1.58.5.min.js"></script>
+
+  <link rel="stylesheet" href="/static/site.css">
 
 </head>
 
 <body>
 
   <div class="container-fluid">
-  
+
     <div class=row>
       <div class="headbar col-xs-8">
-        <h1>Home Network Dashboard</h1>
+        <h1>Home Internet Dashboard</h1>
       </div>
     </div>
 
@@ -63,7 +70,9 @@
       <div class="col-2"></div>
     </div>
 
-    <div class="row d-flex align-items-start dashrow dashrow-top">
+    <div class="dashboard">
+
+    <div class="row d-flex align-items-start dashrow collapse">
       	<div class="col-2"></div>
         <div class="col-5">
           <h2>Your experience.</h2>
@@ -103,7 +112,7 @@
 
       	<div class="col-2"></div>
         <div class="col-5">
-          <h2>Internet bandwidth.</h2>
+          <h2>Bandwidth.</h2>
 
           <p>
           Internet bandwidth is the amount of data that
@@ -114,7 +123,7 @@
 	    can simultaneously use applications like Netflix and Zoom.
         </p>
         <p id="bw_summary" class="collapse">
-	  Your current bandwidth of 
+	  Your current bandwidth of
 	    <span id=text_ookla_dl>100</span>/<span id=text_ookla_ul>20</span>&nbsp;Mbps (download/upload) is
 	    <span id=text_bw_interp>similar to other </span> households' in Chicago.
         It <span id=text_bw_fcc>exceeds</span> the federal standard for being "served" by broadband Internet,
@@ -130,10 +139,10 @@
 	  </p>
 	  <div id=bw_more class=learn_more>
 	    <p>
-	    The Internet uses a variety of different methods or 
+	    The Internet uses a variety of different methods or
 	      "protocols" for sending information.
 	    One method, called TCP, is used for data in websites
-	      and another, UDP, is more appropriate for resource-intensive applications like 
+	      and another, UDP, is more appropriate for resource-intensive applications like
 	      videos, where some information loss is accceptable
 	      (a missed frame does not destroy the experience).
 	    Accordingly, there are a number of ways of testing bandwidth:
@@ -167,7 +176,7 @@
     </div>
 
 
-    <div id="wifi" class="row d-flex align-items-start dashrow">
+    <div id="wifi" class="row d-flex align-items-start dashrow collapse">
 
       	<div class="col-2"></div>
         <div class="col-5">
@@ -261,7 +270,7 @@
 	      thousandths of a second.
           </p>
           <p id="latency_summary" class="collapse">
-	    Your network latency to Google is 
+	    Your network latency to Google is
 	      <span id=text_latency_interp>similar to other</span> households' in Chicago.
           </p>
           <p id="latency_empty" class="collapse">
@@ -273,14 +282,14 @@
 	  </p>
 	  <div id=latency_more class=learn_more>
 	    <p>
-	      Just as there are multiple forms of bandwidth, 
+	      Just as there are multiple forms of bandwidth,
 	        there are also multiple forms of latency.
 	      Of course, we could measure the time delay to any single server (Google, Amazon, or the University of Chicago),
 	      	and the latencies depend both on the network that you connect to (your ISP)
-		and where the destination service is hosted. 
+		and where the destination service is hosted.
 	      For example, Wikipedia is hosted on the West Coast, while
-	      	the Chicago Tribune and the University of Chicago's website 
-		are hosted on "Content Distribution Networks" that replicate content across the country, 
+	      	the Chicago Tribune and the University of Chicago's website
+		are hosted on "Content Distribution Networks" that replicate content across the country,
 		<em>close</em> to consumers.
 	      That physical distance matters.
 	    </p>
@@ -291,7 +300,7 @@
 	      	from a web URL (like google.com) has a timing delay.
 	      The system is called DNS, and we measure the DNS latency.
 	      Your Network Measurement Device also measures latency <em>under load</em>.
-	      This is just the call and response time, 
+	      This is just the call and response time,
 	      	when your network link is fully used.
 	      In practice, this would be like trying to read the New York Times,
 	      	while your spouse downloaded a large file.
@@ -311,7 +320,7 @@
 
 	<div class="col-3">
     <div class="dashval ok">
-      <div class=values id=latency><div class="loader"></div></div>
+      <div class=values><span id=latency><div class="loader"></div></span></div>
       <div class=units>milliseconds</div>
     </div>
 	</div>
@@ -349,10 +358,10 @@
 		you can probably find video calls as "boxes"
 		in your upstream consumption.
 	      True HD video uses somewhat more, up to 5 Mbps.
-	      However this is only in the downstream direction, 
+	      However this is only in the downstream direction,
 	      	which is usually better-provisioned.
 	      For normal browsing, demand on the connection is "peaky":
-	      	you click on a site and there's a "peak" in demand 
+	      	you click on a site and there's a "peak" in demand
 		that subsides a fraction of a second later, when the site has finished loading.
 	      But almost any connection suffices for this sort of simple browsing.
 	      The very-highest levels of bandwidth use come from downloading multi-gigabyte files,
@@ -387,7 +396,7 @@
 
 	  <p>
 	    Many modern electronic devices connect to your Wi-Fi.
-	    Your Network Measurement Device records the number of unique devices that 
+	    Your Network Measurement Device records the number of unique devices that
 	      connect to your router over time.
           </p>
 
@@ -419,6 +428,7 @@
     </div>
 
   </div>
+  </div>
 
   <footer>
     <p>
@@ -427,16 +437,27 @@
       University of Chicago
     </p>
     <p>
-      <img src="/dashboard/asset/img/cdac.svg" class="brand">
+      <img src="/static/img/cdac.svg" class="brand">
     </p>
   </footer>
-  
-  <script type="text/javascript" src="/dashboard/asset/data-mgmt.js"></script>
 
-  <script type="text/javascript" src="/dashboard/asset/ndt/ndt7-core.js"></script>
-  <script type="text/javascript" src="/dashboard/asset/ndt/ndt7-common.js"></script>
+  <script type="text/javascript">
+      ndt7conf = {
+          enabled: false
+      };
+      panelConf = {
+          networkStats: {
+              enabled: false
+          }
+      };
+  </script>
 
-  <script type="text/javascript" src="/dashboard/asset/ndt7-run-dash.js"></script> 
+  <script type="text/javascript" src="/static/data-mgmt.js"></script>
+
+  <script type="text/javascript" src="/static/ndt/ndt7-core.js"></script>
+  <script type="text/javascript" src="/static/ndt/ndt7-common.js"></script>
+
+  <script type="text/javascript" src="/static/ndt7-run-dash.js"></script>
 
 </body>
 

@@ -2,29 +2,19 @@ import contextlib
 import functools
 import importlib
 import logging as default_logging
-import pathlib
 import pkgutil
 import sys
 
 import bottle
 import schedule
 import whitenoise
-from decouple import config
 from loguru import logger as log
 
-from app import handler, plugin, server, task
+from app import conf, handler, plugin, route, server, task
 from app.middleware.response_header import ResponseHeaderMiddleware
 
 
-APP_PATH = pathlib.Path(__file__).absolute().parent
-
-STATIC_PATH = APP_PATH / 'static'
-
-APP_RELOAD = config('APP_RELOAD', default=False, cast=bool)
-
-# BOTTLE_CHILD is set by Bottle in the environ of the special reloading child
-# subprocess; i.e., not exactly configuration, but functionally the same.
-BOTTLE_CHILD = config('BOTTLE_CHILD', default=False, cast=bool)
+dashboard = bottle.Bottle()
 
 
 def configure_logging(level='INFO'):
@@ -32,8 +22,8 @@ def configure_logging(level='INFO'):
     log.remove()
 
     # determine message format
-    if APP_RELOAD:
-        process_name = 'ChildProcess' if BOTTLE_CHILD else 'MainProcess'
+    if conf.APP_RELOAD:
+        process_name = 'ChildProcess' if conf.BOTTLE_CHILD else 'MainProcess'
         process_stanza = f"{process_name:<12} | "
     else:
         process_stanza = ""
@@ -60,11 +50,18 @@ def init_submodules(pkg):
 def init_tasks():
     log.trace('init tasks')
 
-    if APP_RELOAD and not BOTTLE_CHILD:
+    if conf.DATAFILE_BACKEND != 'local':
+        if not conf.BOTTLE_CHILD:
+            log.info("non-local backend | no jobs or tasks to schedule "
+                     "outside of DATAFILE_BACKEND=local mode")
+
+        return None
+
+    if conf.APP_RELOAD and not conf.BOTTLE_CHILD:
         log.warning('bottle reloader | will NOT schedule jobs & tasks in main process')
         return None
 
-    if APP_RELOAD:
+    if conf.APP_RELOAD:
         log.info('bottle reloader | (re)-scheduling jobs & tasks in child process')
 
     # load tasks
@@ -119,8 +116,7 @@ def logging(func):
         if not logging.configured:
             logging.configured = True
 
-            log_level = config('APP_LOG_LEVEL', default='INFO')
-            configure_logging(log_level)
+            configure_logging(conf.LOG_LEVEL)
 
             bottle.install(plugin.RouteErrorLogger())
 
@@ -153,6 +149,10 @@ def task_loop(func=None):
     return ctx_dec if func is None else ctx_dec(func)
 
 
+def redirect_to_dashboard():
+    bottle.redirect(conf.APP_PREFIX, 302)
+
+
 @logging
 @task_loop
 def main():
@@ -160,21 +160,29 @@ def main():
 
     init_submodules(handler)
 
-    bottle_app = bottle.app()
+    core_app = bottle.app()
+
+    core_app.router.add_filter('deviceid', route.deviceid_filter)
+
+    core_app.add_hook('before_request', route.deviceid_hook)
+
+    core_app.mount(conf.APP_PREFIX or '/', dashboard)
+
+    if conf.APP_REDIRECT and conf.APP_PREFIX.strip('/'):
+        core_app.route('/', 'GET', redirect_to_dashboard)
 
     # WhiteNoise not strictly required --
     # Bottle does support static assets --
     # (but, WhiteNoise is more robust, etc.)
     whitenoise_app = whitenoise.WhiteNoise(
-        bottle_app,
-        autorefresh=APP_RELOAD,
-        index_file=True,
-        prefix='/dashboard/',
-        root=STATIC_PATH,
+        core_app,
+        autorefresh=conf.APP_RELOAD,
+        index_file=False,
+        prefix=conf.STATIC_PREFIX,
+        root=conf.ASSET_PATH,
     )
 
-    app_version = config('APP_VERSION', default=None)
-    version_headers = () if app_version is None else [('Software-Version', app_version)]
+    version_headers = () if conf.APP_VERSION is None else [('Software-Version', conf.APP_VERSION)]
 
     app = ResponseHeaderMiddleware(
         whitenoise_app,
@@ -182,7 +190,7 @@ def main():
         Software='netrics-dashboard',
     )
 
-    if config('APP_PROFILE', default=False, cast=bool):
+    if conf.APP_PROFILE:
         from app.middleware.profiler import ProfilerMiddleware
         app = ProfilerMiddleware(app)
 
@@ -191,9 +199,9 @@ def main():
         server=server.WaitressServer,
         threads=8,                           # Waitress: threads
         clear_untrusted_proxy_headers=True,  # Waitress: silence warnings
-        debug=config('APP_DEBUG', default=False, cast=bool),
-        host=config('APP_HOST', default='127.0.0.1'),
-        port=config('APP_PORT', default=8080, cast=int),
-        quiet=config('APP_QUIET', default=False, cast=bool),
-        reloader=APP_RELOAD,
+        debug=conf.APP_DEBUG,
+        host=conf.APP_HOST,
+        port=conf.APP_PORT,
+        quiet=conf.APP_QUIET,
+        reloader=conf.APP_RELOAD,
     )

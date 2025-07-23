@@ -1,10 +1,8 @@
 import sqlite3
 import threading
 
-import app
+from app import conf
 
-
-SQLITE_DEFAULT = app.APP_PATH / 'data.sqlite'
 
 # For downstream maintenance, etc.
 TABLE_SCHEMA = (
@@ -34,7 +32,7 @@ class Client(threading.local):
     @staticmethod
     def make_connection():
         return sqlite3.connect(
-            app.config('APP_DATABASE', default=f'file:{SQLITE_DEFAULT}'),
+            conf.APP_DATABASE,
             uri=True,
         )
 
