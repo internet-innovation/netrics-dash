@@ -1,0 +1,4 @@
+bottle==0.13.4
+loguru==0.5.3
+python-decouple==3.8
+whitenoise==5.2.0

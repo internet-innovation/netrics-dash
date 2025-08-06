@@ -1,9 +1,12 @@
 __pycache__/
 
 .env
+.envrc
 .python-version
 .install.*.bash.inc
 
 .ndt-server/
 
 .var/data.sqlite
+
+/zappa_settings.*

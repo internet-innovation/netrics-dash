@@ -3,7 +3,7 @@
 
 <head>
 
-  <title>Home Internet Dashboard</title>
+  <title>Internet Performance Dashboard</title>
 
   <link rel="icon" type="image/svg+xml" href="/static/img/wifi.svg">
 
@@ -35,7 +35,7 @@
 
     <div class=row>
       <div class="headbar col-xs-8">
-        <h1>Home Internet Dashboard</h1>
+        <h1>Internet Performance Dashboard</h1>
       </div>
     </div>
 
@@ -115,45 +115,59 @@
           <h2>Bandwidth.</h2>
 
           <p>
-          Internet bandwidth is the amount of data that
-	    you can receive from and send to the Internet &ndash; "download" and "upload" &ndash;
-	    through your modem,
-	    in "Megabits per second" (Mbps).
+          Internet <em>bandwidth</em> is the maximum rate at which
+          you can transfer data to and from the Internet.
           This affects how many people in your household
-	    can simultaneously use applications like Netflix and Zoom.
-        </p>
+	      can simultaneously use applications like Netflix and Zoom.
+          </p>
+          <p>
+          <em>Throughput</em> is a measurement of bandwidth: we simply test how much data can be transferred within a span of time.
+
+          Your throughput may vary over the course of the day; however, it should consistently reach close to the bandwidth advertised by your Internet service plan.
+          </p>
+
         <p id="bw_summary" class="collapse">
-	  Your current bandwidth of
-	    <span id=text_ookla_dl>100</span>/<span id=text_ookla_ul>20</span>&nbsp;Mbps (download/upload) is
-	    <span id=text_bw_interp>similar to other </span> households' in Chicago.
-        It <span id=text_bw_fcc>exceeds</span> the federal standard for being "served" by broadband Internet,
+	    Your most recent throughput of
+	    <span id=text_ookla_dl>100</span> / <span id=text_ookla_ul>20</span>&nbsp;Mbps (download / upload)
+        <span id=bw_interp class="collapse">is<span id=text_bw_interp>similar to other </span> households' in the U.S. It </span>
+        <span id=text_bw_fcc>exceeds</span> the federal standard for being "served" by broadband Internet
 	    of 100 Mbps download and 20 Mbps upload.
-	    <span id=text_bw_stability>Your bandwidth is consistent</span> over time.
+	    <span id=text_bw_stability>Your throughput is consistent</span> over time.
           </p>
         <p id="bw_empty" class="collapse">
         Measurements of your Internet bandwidth will be collected here.
           </p>
 
 	  <p class=extras>
-	    <span data-toggle="bw_more" class="toggle-button" id=bw_more_tog>+ Learn more</span> <br>
+	    <span data-toggle="bw_more" class="toggle-button" id=bw_more_tog>+ Learn more</span>
 	  </p>
 	  <div id=bw_more class=learn_more>
 	    <p>
-	    The Internet uses a variety of different methods or
-	      "protocols" for sending information.
-	    One method, called TCP, is used for data in websites
-	      and another, UDP, is more appropriate for resource-intensive applications like
-	      videos, where some information loss is accceptable
-	      (a missed frame does not destroy the experience).
-	    Accordingly, there are a number of ways of testing bandwidth:
-	      some for UDP and others for TCP.
-	    There are multiple programs for measuring TCP bandwidth.
-	    Your Network Measurement Device runs all of these, to assess their consistency.
+          Bandwidth is also sometimes referred to as your Internet "speed";
+          however, many factors impact the performance of Internet applications.
+	    </p>
+	    <p>
+          Because applications must both receive data from and send data to the Internet,
+          bandwidth is often presented as a maximum "download" capacity and a maximum "upload" capacity.
+
+          These capacities are measured as units of data per second
+          &ndash; most commonly as megabits per second (Mbps) or gigabits per second (Gbps or even simply "gigs").
+	    </p>
+	  </div>
+
+	  <p class=extras>
+	    <span data-toggle="bw_do" class="toggle-button" id=bw_do_tog>+ What can I do?</span>
+	  </p>
+	  <div id=bw_do class=learn_more>
+	    <p>
+        If you find you're not consistently reaching the bandwidth advertised by your broadband
+        subscription you can contact your Internet Service Provider (ISP) to let them know.
+        Find out the bandwidth you're paying for from your broadband bill or from your provider.
 	    </p>
 	  </div>
 
 	  <p id=bw_plot_tog class="extras collapse">
-	    <span data-toggle="bw_plot" data-toggle-defer="plots" class="toggle-button toggle-button-deferred">+ My bandwidth over time</span>
+	    <span data-toggle="bw_plot" data-toggle-defer="plots" class="toggle-button toggle-button-deferred">+ My throughput over time</span>
 	  </p>
 	  <div id=bw_plot class=learn_more></div>
 
@@ -264,50 +278,33 @@
           <h2>Latency.</h2>
 
           <p>
-	    Latency is the amount of time that it takes
+          <em>Latency</em> is the amount of time that it takes
 	      to reach a service on the Internet, like Wikipedia or YouTube.
-	    This is measured in milliseconds &mdash;
-	      thousandths of a second.
+	    This is measured in milliseconds: thousandths of a second.
+          The greater the number the more that your Internet experience may be disrupted.
           </p>
           <p id="latency_summary" class="collapse">
-	    Your network latency to Google is
-	      <span id=text_latency_interp>similar to other</span> households' in Chicago.
+	    Your latency to Google is
+	      <span id=text_latency_interp>similar to other</span> households' in the U.S.
           </p>
           <p id="latency_empty" class="collapse">
         Measurements of your Internet latency will be collected here.
           </p>
 
 	  <p class=extras>
-	    <span data-toggle="latency_more" class="toggle-button" id=latency_more_tog>+ Learn more</span> <br>
+	    <span data-toggle="latency_more" class="toggle-button" id=latency_more_tog>+ Learn more</span>
 	  </p>
 	  <div id=latency_more class=learn_more>
 	    <p>
-	      Just as there are multiple forms of bandwidth,
-	        there are also multiple forms of latency.
-	      Of course, we could measure the time delay to any single server (Google, Amazon, or the University of Chicago),
-	      	and the latencies depend both on the network that you connect to (your ISP)
-		and where the destination service is hosted.
-	      For example, Wikipedia is hosted on the West Coast, while
-	      	the Chicago Tribune and the University of Chicago's website
-		are hosted on "Content Distribution Networks" that replicate content across the country,
-		<em>close</em> to consumers.
-	      That physical distance matters.
-	    </p>
-	    <p>
-	      At a deeper level however, there are other Internet services that actually <em>do</em> things&nbsp;&mdash;
-	        not just bounce a "ping" back and forth.
-	      For example, the system that retrieves the computer-readable address (like 172.217.4.206)
-	      	from a web URL (like google.com) has a timing delay.
-	      The system is called DNS, and we measure the DNS latency.
-	      Your Network Measurement Device also measures latency <em>under load</em>.
-	      This is just the call and response time,
-	      	when your network link is fully used.
-	      In practice, this would be like trying to read the New York Times,
-	      	while your spouse downloaded a large file.
-	      Your connection <em>should</em> be able to handle this,
-	      	but many connections perform very poorly in these circumstances,
-		a condition called buffer bloat.
-	    </p>
+        Latencies depend on your Internet service &ndash; including your WiFi &ndash; and on how requested applications are served.
+        For example, Wikipedia is hosted on the West Coast, while services such as Google and the University of Chicago website are hosted on "Content Distribution Networks" (CDNs), which replicate content across the country, keeping it close to consumers wherever they are. That physical distance contributes to how long it takes to reach a service online.
+        </p>
+        <p>
+        If you find that a number of simple webpages are slow to load then you might be experiencing poor latency.
+        </p>
+        <p>
+        On the other hand, if this is only a problem when, for example, another member of your household is watching videos or playing games, then it's possible your service suffers from <em>latency under load</em>.
+        </p>
 	  </div>
 
 	  <p id=latency_plot_tog class="extras collapse">

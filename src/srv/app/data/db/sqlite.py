@@ -1,3 +1,4 @@
+import pathlib
 import sqlite3
 import threading
 
@@ -31,10 +32,14 @@ class Client(threading.local):
 
     @staticmethod
     def make_connection():
-        return sqlite3.connect(
-            conf.APP_DATABASE,
-            uri=True,
-        )
+        if conf.APP_DATABASE.startswith('file:auto:'):
+            db_path = pathlib.Path(conf.APP_DATABASE[10:])
+            db_path.parent.mkdir(exist_ok=True, parents=True)
+            uri = f'file:{db_path}'
+        else:
+            uri = conf.APP_DATABASE
+
+        return sqlite3.connect(uri, uri=True)
 
     def connect(self):
         try:

@@ -6,15 +6,89 @@ import pkgutil
 import sys
 
 import bottle
-import schedule
 import whitenoise
 from loguru import logger as log
 
-from app import conf, handler, plugin, route, server, task
+from app import conf, handler, plugin, route
+from app.lib import error
 from app.middleware.response_header import ResponseHeaderMiddleware
+
+try:
+    import schedule
+except ModuleNotFoundError:
+    schedule = task = None
+else:
+    from app import task
 
 
 dashboard = bottle.Bottle()
+
+
+def init_submodules(pkg):
+    for module_info in pkgutil.walk_packages(pkg.__path__, f'{pkg.__name__}.'):
+        if not module_info.ispkg:
+            importlib.import_module(module_info.name)
+
+
+def redirect_to_dashboard():
+    bottle.redirect(conf.APP_PREFIX, 302)
+
+
+class WSGI:
+
+    def __init__(self):
+        self.app = None
+
+    def __call__(self, environ, start_response):
+        if self.app is None:
+            init_submodules(handler)
+
+            self.app = self.make_wsgi()
+
+        return self.app(environ, start_response)
+
+    @staticmethod
+    def make_wsgi():
+        core_app = bottle.app()
+
+        core_app.router.add_filter('deviceid', route.deviceid_filter)
+
+        core_app.add_hook('before_request', route.deviceid_hook)
+
+        core_app.mount(conf.APP_PREFIX or '/', dashboard)
+
+        if conf.APP_REDIRECT and conf.APP_PREFIX.strip('/'):
+            core_app.route('/', 'GET', redirect_to_dashboard)
+
+        # WhiteNoise not strictly required --
+        # Bottle does support static assets --
+        # (but, WhiteNoise is more robust, etc.)
+        whitenoise_app = whitenoise.WhiteNoise(
+            core_app,
+            autorefresh=conf.APP_RELOAD,
+            index_file=False,
+            prefix=conf.STATIC_PREFIX,
+            root=conf.ASSET_PATH,
+        )
+
+        version_headers = () if conf.APP_VERSION is None else [
+            ('Software-Version', conf.APP_VERSION)
+        ]
+
+        app = ResponseHeaderMiddleware(
+            whitenoise_app,
+            *version_headers,
+            Software='netrics-dashboard',
+        )
+
+        if conf.APP_PROFILE:
+            from app.middleware.profiler import ProfilerMiddleware
+            app = ProfilerMiddleware(app)
+
+        return app
+
+
+wsgi = WSGI()
 
 
 def configure_logging(level='INFO'):
@@ -41,12 +115,6 @@ def configure_logging(level='INFO'):
     default_logging.getLogger('schedule').setLevel(level=level)
 
 
-def init_submodules(pkg):
-    for module_info in pkgutil.walk_packages(pkg.__path__, f'{pkg.__name__}.'):
-        if not module_info.ispkg:
-            importlib.import_module(module_info.name)
-
-
 def init_tasks():
     log.trace('init tasks')
 
@@ -63,6 +131,10 @@ def init_tasks():
 
     if conf.APP_RELOAD:
         log.info('bottle reloader | (re)-scheduling jobs & tasks in child process')
+
+    # check for dependency
+    if schedule is None:
+        raise error.ExplicitDependencyError.make_default('schedule')
 
     # load tasks
     #
@@ -149,54 +221,14 @@ def task_loop(func=None):
     return ctx_dec if func is None else ctx_dec(func)
 
 
-def redirect_to_dashboard():
-    bottle.redirect(conf.APP_PREFIX, 302)
-
-
 @logging
 @task_loop
 def main():
     log.trace('init server')
 
-    init_submodules(handler)
-
-    core_app = bottle.app()
-
-    core_app.router.add_filter('deviceid', route.deviceid_filter)
-
-    core_app.add_hook('before_request', route.deviceid_hook)
-
-    core_app.mount(conf.APP_PREFIX or '/', dashboard)
-
-    if conf.APP_REDIRECT and conf.APP_PREFIX.strip('/'):
-        core_app.route('/', 'GET', redirect_to_dashboard)
-
-    # WhiteNoise not strictly required --
-    # Bottle does support static assets --
-    # (but, WhiteNoise is more robust, etc.)
-    whitenoise_app = whitenoise.WhiteNoise(
-        core_app,
-        autorefresh=conf.APP_RELOAD,
-        index_file=False,
-        prefix=conf.STATIC_PREFIX,
-        root=conf.ASSET_PATH,
-    )
-
-    version_headers = () if conf.APP_VERSION is None else [('Software-Version', conf.APP_VERSION)]
-
-    app = ResponseHeaderMiddleware(
-        whitenoise_app,
-        *version_headers,
-        Software='netrics-dashboard',
-    )
-
-    if conf.APP_PROFILE:
-        from app.middleware.profiler import ProfilerMiddleware
-        app = ProfilerMiddleware(app)
-
     bottle.run(
-        app,
-        server=server.WaitressServer,
+        wsgi,
+        server=bottle.WaitressServer,
         threads=8,                           # Waitress: threads
         clear_untrusted_proxy_headers=True,  # Waitress: silence warnings
         debug=conf.APP_DEBUG,

@@ -1,25 +1,22 @@
 # syntax=docker/dockerfile:1
-FROM python:3.13-alpine3.22
+FROM python:3.13-alpine3.22 AS base-image
 # Starting with alpine3.14 features sqlite3.35 and "returning" clause
 
 # Builds intended for deployment should specify the software
 # version via "APPVERSION".
 ARG APPVERSION
 ARG APPNAME=dashboard
-ARG FATEVERSION=1.1.0
 
 # Label "version" may be incremented upon changing this file.
-LABEL version="4"                \
+LABEL version="5"                \
       appname="$APPNAME"         \
-      appversion="$APPVERSION"   \
-      fateversion="$FATEVERSION"
+      appversion="$APPVERSION"
 
 # Configure core app environment.
-ENV APP_NAME="$APPNAME"                               \
-    APP_VERSION="$APPVERSION"                         \
-    APP_HOST="0.0.0.0"                                \
-    APP_DATABASE="file:/var/lib/$APPNAME/data.sqlite" \
-    PYTHONPATH=/usr/src/"$APPNAME"/srv                \
+ENV APP_NAME="$APPNAME"                                    \
+    APP_VERSION="$APPVERSION"                              \
+    APP_DATABASE="file:auto:/var/lib/$APPNAME/data.sqlite" \
+    PYTHONPATH=/usr/src/"$APPNAME"/srv                     \
     PYTHONUNBUFFERED=1
 
 # Create core app user, group and directories.
@@ -36,25 +33,31 @@ RUN <<-EOF
 	mkdir -p /var/lib/"$APPNAME"
 	chown "$APPNAME" /var/lib/"$APPNAME"
 	chmod ug+rwx /var/lib/"$APPNAME"
-
-	mkdir -p /var/cache/"$APPNAME"
-	chown "$APPNAME" /var/cache/"$APPNAME"
-	chmod ug+rwx /var/cache/"$APPNAME"
 EOF
 
-WORKDIR /usr/src/"$APPNAME"
-
 # Copy in API source from host disk.
-COPY --chown="$APPNAME":"$APPNAME" src/srv/ srv/
+COPY --chown="$APPNAME":"$APPNAME" src/srv/ /usr/src/"$APPNAME"/srv/
 
 # ...and requirement file(s)
-COPY --chown="$APPNAME":"$APPNAME" requirement/ requirement/
+COPY --chown="$APPNAME":"$APPNAME" requirement/ /usr/src/"$APPNAME"/requirement/
 
-# Install web app (globally)
-RUN set -ex \
-    ; python -m pip install --no-cache-dir -r requirement/main.txt
+# Install core app (globally)
+RUN python -m pip install --no-cache-dir -r /usr/src/"$APPNAME"/requirement/core.txt
 
-# ...and Fate (isolated with global links)
+WORKDIR /usr/src/"$APPNAME"/srv
+
+
+FROM base-image AS cmd
+
+ARG FATEVERSION=1.1.0
+
+LABEL fateversion="$FATEVERSION" \
+      buildflavor=cmd
+
+# Install flavor requirements (globally)
+RUN python -m pip install --no-cache-dir -r /usr/src/"$APPNAME"/requirement/cmd.txt
+
+# Install Fate (isolated with global links)
 #
 # (fate installed into venv but override prefix inference to treat as system-global)
 #
@@ -84,37 +87,143 @@ RUN <<-INSTALL-FATE
 	ln -s /usr/local/lib/fate/bin/fate* /usr/local/bin
 INSTALL-FATE
 
-# Create conventional interface convenience scripts.
-#
-# These will additionally bootstrap (create) the environment-configured database directory
-# if it doesn't already exist.
-#
-COPY --chmod=775 <<-"app-serve" /usr/local/bin/serve
-	#!/bin/sh
-	case "${APP_DATABASE}" in file:*) mkdir -p $(dirname "${APP_DATABASE#?????}") || exit 1; esac
-
-	exec python -m app
-app-serve
-
+# Create conventional interface convenience script
 COPY --chmod=775 <<-"app-extract" /usr/local/bin/extract
 	#!/bin/sh
-	case "${APP_DATABASE}" in file:*) mkdir -p $(dirname "${APP_DATABASE#?????}") || exit 1; esac
-
 	exec fated --foreground
 app-extract
 
+RUN ln -s /usr/local/bin/extract /usr/local/bin/"${APPNAME}"-extract
+
+USER "$APPNAME"
+
+CMD ["dashboard-extract"]
+
+
+FROM base-image AS serve-base
+
+# Extend core app user, group and directories.
 RUN <<-EOF
 	set -ex
 
-	ln -s /usr/local/bin/serve /usr/local/bin/"${APPNAME}"-serve
+	mkdir -p /var/cache/"$APPNAME"
+	chown "$APPNAME" /var/cache/"$APPNAME"
+	chmod ug+rwx /var/cache/"$APPNAME"
+EOF
 
-	ln -s /usr/local/bin/extract /usr/local/bin/"${APPNAME}"-extract
+
+FROM python:3.13-alpine3.22 AS build-lambda
+
+COPY requirement/serve-lambda.txt /
+
+RUN <<-EOF
+    mkdir /export/
+
+    # required to build awslambdaric in alpine
+    apk add --no-cache \
+      autoconf \
+      automake \
+      cmake \
+      g++ \
+      gcc \
+      libffi-dev \
+      libtool \
+      linux-headers \
+      make \
+      musl-dev \
+      openssl-dev
+
+    # libexecinfo-dev removed in alpine3.17
+    apk add --no-cache --update --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main/ libexecinfo-dev
+
+    python -m pip install --no-cache-dir \
+      --target /export/ \
+      -r /serve-lambda.txt
+EOF
+
+
+FROM serve-base AS serve-lambda
+
+LABEL buildflavor=serve-lambda
+
+ENV APP_DATABASE="file:auto:/tmp/$APPNAME/var/lib/data.sqlite"         \
+    APP_PREFIX=/<:deviceid>/                                           \
+    DATAFILE_BACKEND=s3                                                \
+    DATAFILE_S3_CACHE_PATH="/tmp/$APPNAME/var/cache/data/file/s3/get/"
+
+# Install global environmental requirements
+RUN <<-EOF
+    set -ex
+
+    apk add --no-cache \
+        libstdc++ \
+	nghttp2-libs \
+	libidn2 \
+	libpsl \
+	zstd-libs \
+	brotli-libs
+
+    python -m pip install --no-cache-dir -r /usr/src/"$APPNAME"/requirement/backend-s3.txt
+EOF
+
+# Copy requirements built separately
+COPY --from=build-lambda /export/ /usr/local/lib/python3.13/site-packages/
+
+RUN --mount=type=bind,source=zappa_settings.toml,target=/mnt/zappa_settings.toml <<-EOF
+    python -m zappa.cli save-python-settings-file \
+        -s /mnt/zappa_settings.toml \
+	-o /usr/src/"$APPNAME"/srv/zappa_settings.py
 EOF
 
 USER "$APPNAME"
 
-WORKDIR /usr/src/"$APPNAME"/srv
+ENTRYPOINT ["/usr/local/bin/python", "-m", "awslambdaric"]
 
-CMD ["serve"]
+CMD ["zappa.handler.lambda_handler"]
+
+
+FROM serve-base AS serve-local-base
+
+ENV APP_HOST="0.0.0.0"
+
+# Create conventional interface convenience script
+COPY --chmod=775 <<-"app-serve" /usr/local/bin/serve
+	#!/bin/sh
+	exec python -m app
+app-serve
+
+RUN ln -s /usr/local/bin/serve /usr/local/bin/"${APPNAME}"-serve
+
+# Install flavor requirements (globally)
+RUN python -m pip install --no-cache-dir -r /usr/src/"$APPNAME"/requirement/serve-builtin.txt
+
+CMD ["dashboard-serve"]
 
 EXPOSE 8080
+
+
+FROM serve-local-base AS serve-local-s3
+
+LABEL buildflavor=serve-local-s3
+
+ENV DATAFILE_BACKEND=s3 \
+    APP_PREFIX=/<:deviceid>/
+
+# Install flavor requirements (globally)
+RUN python -m pip install --no-cache-dir -r /usr/src/"$APPNAME"/requirement/backend-s3.txt
+
+USER "$APPNAME"
+
+
+FROM serve-local-base AS serve-local2
+
+LABEL buildflavor=serve-local2
+
+ENV DATAFILE_BACKEND=local \
+    APP_REDIRECT=on        \
+    APP_PREFIX=/dashboard/
+
+# Install flavor requirements (globally)
+RUN python -m pip install --no-cache-dir -r /usr/src/"$APPNAME"/requirement/backend-local.txt
+
+USER "$APPNAME"

@@ -11,9 +11,12 @@ from manage.main import Management
 class Serve(lib.DockerCommand):
     """serve dashboard locally"""
 
+    flavors = ('local2', 'local-s3', 'lambda')
+
     def __init__(self, parser):
-        parser.add_argument('--name', default='ndash',
-                            help="name to apply to local dashboard container (default: %(default)s)")
+        parser.add_argument('--name',
+                            help="name to apply to local dashboard container (default: ndash)")
+        parser.add_argument('--flavor', choices=self.flavors, help="variation of dashboard to serve")
         parser.add_argument('--version', default='latest',
                             help="version/tag of image to run (default: %(default)s)")
         parser.add_argument('--log-level',
@@ -57,12 +60,29 @@ class Serve(lib.DockerCommand):
         else:
             return {key.upper(): value for (key, value) in creds_values.items()}
 
+    @property
+    def ctrname(self):
+        if self.args.name:
+            return self.args.name
+
+        if self.args.flavor:
+            return 'ndash-' + self.args.flavor
+
+        return 'ndash'
+
+    @property
+    def reponame(self):
+        if self.args.flavor:
+            return 'netrics-dashboard-serve-' + self.args.flavor
+
+        return 'netrics-dashboard'
+
     def prepare(self, args):
         for cleanup_command in ('stop', 'rm'):
             try:
                 yield lib.SHH, self.docker[
                     cleanup_command,
-                    args.name,
+                    self.ctrname,
                 ]
             except self.local.ProcessExecutionError:
                 pass
@@ -70,8 +90,7 @@ class Serve(lib.DockerCommand):
         run_command = self.docker[
             'run',
             '-d',
-            '-p', '8080:8080',
-            '--name', args.name,
+            '--name', self.ctrname,
         ]
 
         if config.ENV_FILE.exists():
@@ -107,9 +126,23 @@ class Serve(lib.DockerCommand):
         for (env_key, env_value) in self.aws_credentials.items():
             run_command = run_command['-e', f'{env_key}={env_value}']
 
-        yield lib.SHH, run_command[
-            f'{args.image_repo}/netrics-dashboard:{args.version}',
-        ]
+        if args.flavor == 'lambda':
+            run_command = run_command[
+                '-p', '9000:8080',
+                '--volume', str(pathlib.Path.home() / '.aws-lambda-rie') + ':/aws-lambda',
+                '--entrypoint', '/aws-lambda/aws-lambda-rie',
+                f'{args.image_repo}/{self.reponame}:{args.version}',
+                '/usr/local/bin/python3',
+                '-m', 'awslambdaric',
+                'zappa.handler.lambda_handler',
+            ]
+        else:
+            run_command = run_command[
+                '-p', '8080:8080',
+                f'{args.image_repo}/{self.reponame}:{args.version}',
+            ]
+
+        yield lib.SHH, run_command
 
         if args.execute_commands:
             print('SUCCESS:' | colors.success,
