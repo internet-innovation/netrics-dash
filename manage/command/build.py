@@ -18,11 +18,20 @@ def version_type(value):
 class Build(lib.DockerCommand):
     """build dashboard images for amd64 & arm64"""
 
+    dashboard_stages = ('cmd', 'serve-local2', 'serve-local-s3', 'serve-lambda')
+    dashboard_default = dashboard_stages[1]
+
     def __init__(self, parser):
-        parser.add_argument('target', choices=('dash', 'ndt-full', 'ndt-base'), help="build target")
+        parser.add_argument('app', choices=('dash', 'ndt-full', 'ndt-base'), help="app to build")
         parser.add_argument('--version', type=version_type,
                             help="version to apply to the local dashboard app or to "
                                  "the extended ndt server (e.g.: 1.0.1)")
+        parser.add_argument('--target',
+                            choices=self.dashboard_stages,
+                            metavar='STAGE',
+                            help="dashboard stage (\"flavor\") to build "
+                                 f"(default: {self.dashboard_default}, or one of: %(choices)s)")
+        parser.add_argument('--aws-repo', help="URI of AWS ECR to push Lambda images")
         parser.add_argument('--ndt-cache', default=(config.REPO_PATH / '.ndt-server'),
                             metavar='PATH', type=pathlib.Path,
                             help="path at which to cache the ndt-server repository "
@@ -112,18 +121,38 @@ class Build(lib.DockerCommand):
         ]
 
     def prepare_dash(self):
+        if self.args.aws_repo and 'lambda' in self.args.target:
+            aws_repo_name = f'{self.args.aws_repo}/netrics-dashboard/{self.args.target}'
+            tag_args = [*self.tag_args(aws_repo_name, self.args.version)]
+        else:
+            repo_stem = f'{self.args.image_repo}/netrics-dashboard'
+            repo_tags = (f'{repo_stem}-{self.args.target}',)
+
+            if self.args.target == self.dashboard_default:
+                repo_tags += (repo_stem,)
+
+            tag_args = [tag_arg
+                        for repo_tag in repo_tags
+                        for tag_arg in self.tag_args(repo_tag, self.args.version)]
+
         yield self.local.FG, self.docker[
             'buildx',
             'build',
-            '--platform', self.platforms,
+            '--target', self.args.target,
+            '--platform', 'linux/amd64',
             '--build-arg', f'APPVERSION={self.args.version}',
-            self.tag_args(f'{self.args.image_repo}/netrics-dashboard', self.args.version),
+            tag_args,
             config.REPO_PATH,
             self.action,
         ]
 
     def prepare(self, args, parser):
-        if args.target == 'dash' or args.target == 'ndt-full':
+        if args.target and args.app != 'dash':
+            parser.error('--target only applies to dash builds')
+        elif not args.target:
+            args.target = self.dashboard_default
+
+        if args.app == 'dash' or args.app == 'ndt-full':
             if not args.version:
                 parser.error('--version required to build either dash or ndt-full')
         elif args.version:
@@ -156,14 +185,14 @@ class Build(lib.DockerCommand):
             args.builder,
         ]
 
-        if args.target == 'ndt-base':
+        if args.app == 'ndt-base':
             yield from self.prepare_ndt_base()
 
-        elif args.target == 'ndt-full':
+        elif args.app == 'ndt-full':
             yield from self.prepare_ndt_full()
 
-        elif args.target == 'dash':
+        elif args.app == 'dash':
             yield from self.prepare_dash()
 
         else:
-            raise NotImplementedError(args.target)
+            raise NotImplementedError(args.app)

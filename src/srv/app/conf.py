@@ -127,7 +127,7 @@ DATAFILE_S3_BASE = config('DATAFILE_S3_BASE', default='')
 #
 # (This can increase performance by excluding unproductive paths from the search.)
 #
-DATAFILE_S3_IGNORE = config('DATAFILE_S3_IGNORE', cast=Csv(delimiter=':'))
+DATAFILE_S3_IGNORE = config('DATAFILE_S3_IGNORE', cast=Csv(delimiter=':'), default='')
 #
 #
 DATAFILE_S3_CACHE_PATH = config('DATAFILE_S3_CACHE_PATH',
