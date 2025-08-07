@@ -3,7 +3,7 @@ import itertools
 
 
 def is_exc(x):
-    return issubclass(x, BaseException)
+    return isinstance(x, type) and issubclass(x, BaseException)
 
 
 def not_exc(x):
