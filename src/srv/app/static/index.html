@@ -73,107 +73,109 @@
     <div class="dashboard">
 
     <div class="row d-flex align-items-start dashrow collapse">
-      	<div class="col-2"></div>
+          <div class="col-2"></div>
         <div class="col-5">
           <h2>Your experience.</h2>
 
           <p>
-	    Below, we list a number of <em>technical</em> measures of Internet peformance.
-	    Ultimately, what matters is whether or not your connection is working for <em>you</em>.
-	    This is called "quality of experience" or "subjective experience."
+        Below, we list a number of <em>technical</em> measures of Internet peformance.
+        Ultimately, what matters is whether or not your connection is working for <em>you</em>.
+        This is called "quality of experience" or "subjective experience."
           <p>
-	    By flagging when you experience Internet connection problems&nbsp;&mdash;
-	      dropped calls or poor video, for example&nbsp;&mdash; you help us learn what connection
-	      parameters matter in practice.
-	    Note that we cannot <em>solve</em> these issues for you: we are not your Internet Service Provider (ISP).
+        By flagging when you experience Internet connection problems&nbsp;&mdash;
+          dropped calls or poor video, for example&nbsp;&mdash; you help us learn what connection
+          parameters matter in practice.
+        Note that we cannot <em>solve</em> these issues for you: we are not your Internet Service Provider (ISP).
           </p>
-	</div>
+    </div>
 
     <div class="col-3">
         <div class="dashval attn dropdown" id="survey_box">
           <button class="btn btn-primary btn-block dropdown-toggle survey" type="button" id="subj_button" data-bs-toggle="dropdown" aria-expanded="false">
-	    <span>How is your<br>Internet?</span>
+        <span>How is your<br>Internet?</span>
           </button>
           <ul class="dropdown-menu" aria-labelledby="subj_button">
             <li><a class="dropdown-item" href="#" onclick="subjectiveReport.send('good')">Good</a></li>
             <li><a class="dropdown-item" href="#" onclick="subjectiveReport.send('slow')">Slow</a></li>
             <li><a class="dropdown-item" href="#" onclick="subjectiveReport.send('unusable')">Unusable</a></li>
           </ul>
-	  <div id="survey_thanks"></div>
+      <div id="survey_thanks"></div>
       </div>
-	</div>
+    </div>
 
-      	<div class="col-2"></div>
+          <div class="col-2"></div>
 
     </div>
 
 
     <div class="row d-flex align-items-start dashrow">
+          <div class="col-2"></div>
+        <div class="col-8">
+          <h2>Your data</h2>
+          <p class="fs-4">
+          We often hear about Internet “speed.” Speed contains two distinct components: <em>throughput</em> and <em>latency</em>.
+          </p>
+        </div>
+          <div class="col-2"></div>
+    </div>
 
-      	<div class="col-2"></div>
+    <div class="row d-flex align-items-start dashrow">
+
+          <div class="col-2"></div>
         <div class="col-5">
-          <h2>Bandwidth.</h2>
+          <h3>Throughput</h3>
 
           <p>
-          Internet <em>bandwidth</em> is the maximum rate at which
-          you can transfer data to and from the Internet.
-          This affects how many people in your household
-	      can simultaneously use applications like Netflix and Zoom.
+          When Internet Service Providers (ISPs) advertise their “speed” they're often just refering to throughput.
           </p>
           <p>
-          <em>Throughput</em> is a measurement of bandwidth: we simply test how much data can be transferred within a span of time.
-
-          Your throughput may vary over the course of the day; however, it should consistently reach close to the bandwidth advertised by your Internet service plan.
+          Throughput is the amount of data that you can receive from and send to the Internet within a given amount of time. Your throughput may vary over the course of the day; however, it should consistently reach close to the "speed" or "bandwidth" advertised by your Internet service plan.
           </p>
 
         <p id="bw_summary" class="collapse">
-	    Your most recent throughput of
-	    <span id=text_ookla_dl>100</span> / <span id=text_ookla_ul>20</span>&nbsp;Mbps (download / upload)
+        Your most recent throughput of
+        <span id=text_ookla_dl>100</span> / <span id=text_ookla_ul>20</span>&nbsp;Mbps (download / upload)
         <span id=bw_interp class="collapse">is<span id=text_bw_interp>similar to other </span> households' in the U.S. It </span>
         <span id=text_bw_fcc>exceeds</span> the federal standard for being "served" by broadband Internet
-	    of 100 Mbps download and 20 Mbps upload.
-	    <span id=text_bw_stability>Your throughput is consistent</span> over time.
+        of 100 Mbps download and 20 Mbps upload.
+        <span id=text_bw_stability>Your throughput is consistent</span> over time.
           </p>
         <p id="bw_empty" class="collapse">
-        Measurements of your Internet bandwidth will be collected here.
+        Measurements of your Internet throughput will be collected here.
           </p>
 
-	  <p class=extras>
-	    <span data-toggle="bw_more" class="toggle-button" id=bw_more_tog>+ Learn more</span>
-	  </p>
-	  <div id=bw_more class=learn_more>
-	    <p>
-          Bandwidth is also sometimes referred to as your Internet "speed";
-          however, many factors impact the performance of Internet applications.
-	    </p>
-	    <p>
+      <p class="extras collapse">
+        <span data-toggle="bw_more" class="toggle-button" id=bw_more_tog>+ Learn more</span>
+      </p>
+      <div id=bw_more class="learn_more collapse">
+        <p>
           Because applications must both receive data from and send data to the Internet,
           bandwidth is often presented as a maximum "download" capacity and a maximum "upload" capacity.
 
           These capacities are measured as units of data per second
           &ndash; most commonly as megabits per second (Mbps) or gigabits per second (Gbps or even simply "gigs").
-	    </p>
-	  </div>
+        </p>
+      </div>
 
-	  <p class=extras>
-	    <span data-toggle="bw_do" class="toggle-button" id=bw_do_tog>+ What can I do?</span>
-	  </p>
-	  <div id=bw_do class=learn_more>
-	    <p>
-        If you find you're not consistently reaching the bandwidth advertised by your broadband
-        subscription you can contact your Internet Service Provider (ISP) to let them know.
-        Find out the bandwidth you're paying for from your broadband bill or from your provider.
-	    </p>
-	  </div>
+      <p class=extras>
+        <span data-toggle="bw_do" class="toggle-button" id=bw_do_tog>+ What can I do?</span>
+      </p>
+      <div id=bw_do class=learn_more>
+        <p>
+        If you find you're not consistently reaching the throughput advertised by your broadband
+        subscription you can contact your provider to let them know.
+        Find out the throughput you're paying for from your broadband bill or from your provider.
+        </p>
+      </div>
 
-	  <p id=bw_plot_tog class="extras collapse">
-	    <span data-toggle="bw_plot" data-toggle-defer="plots" class="toggle-button toggle-button-deferred">+ My throughput over time</span>
-	  </p>
-	  <div id=bw_plot class=learn_more></div>
+      <p id=bw_plot_tog class="extras collapse">
+        <span data-toggle="bw_plot" data-toggle-defer="plots" class="toggle-button toggle-button-deferred">+ My throughput over time</span>
+      </p>
+      <div id=bw_plot class=learn_more></div>
 
-	</div>
+    </div>
 
-	<div class="col-3">
+    <div class="col-3">
     <div class="dashval ok">
       <div class=values>
         <span id=ookla_dl></span>
@@ -184,36 +186,36 @@
       </div>
       <div class=units>megabits per second</div>
     </div>
-	</div>
-      	<div class="col-2"></div>
+    </div>
+          <div class="col-2"></div>
 
     </div>
 
 
     <div id="wifi" class="row d-flex align-items-start dashrow collapse">
 
-      	<div class="col-2"></div>
+          <div class="col-2"></div>
         <div class="col-5">
-          <h2>Network bandwidth.</h2>
+          <h3>Network bandwidth.</h3>
 
           <p>
-	    Your home network bandwidth is how much data your (wireless or Wi-Fi)
-	      router can send to your computer, per second.
-	    If your network bandwidth is less than that of your Internet connection,
-	      you won't be able to use the full bandwidth that
-	      you pay for from your Internet Service Provider (ISP).
+        Your home network bandwidth is how much data your (wireless or Wi-Fi)
+          router can send to your computer, per second.
+        If your network bandwidth is less than that of your Internet connection,
+          you won't be able to use the full bandwidth that
+          you pay for from your Internet Service Provider (ISP).
           </p>
 
           <div id="wifi-info" class="wifi-stats">
           </div>
 
-	  <p class="loading">
+      <p class="loading">
         A test of your network <span class="wifi-stats">also</span> runs automatically when you load this page (as well as when you click the "Test Network" button on the right)
-	  </p>
-	  <p id="text_wifi_interp" class="wifi-result d-none">
-	    &hellip; Your network bandwidth was <span id=text_wifi_interp1>greater than</span> that of the connection from your ISP:
-	      that's <span id=text_wifi_interp2>good</span>.
-	  </p>
+      </p>
+      <p id="text_wifi_interp" class="wifi-result d-none">
+        &hellip; Your network bandwidth was <span id=text_wifi_interp1>greater than</span> that of the connection from your ISP:
+          that's <span id=text_wifi_interp2>good</span>.
+      </p>
       <p id="wifi-busy" class="wifi-result d-none">
         <strong>Whoops.</strong> A test was already running. Try again in a few moments.
       </p>
@@ -221,40 +223,40 @@
         <strong>Whoops.</strong> Something went wrong. Try again in a few moments.
       </p>
 
-	  <p class=extras>
-	    <span data-toggle="wifi_more" class="toggle-button" id=bw_more_tog>+ Learn more</span> <br>
-	  </p>
-	  <div id=wifi_more class=learn_more>
-	    <p>
-	      Wi-Fi is often the weakest link in a network connection.
-	      There are some simple steps you can take to improve performance:
-	      <ul>
-		<li>
-		    Move your Wi-Fi away from big chunks of metal like dishwashers or radiators.
-		    These can really block the signal!
-		</li>
- 		<li>
-		    Similarly, just putting the router "high up"&nbsp;&mdash;
-		      on a bookshelp or cabinet&nbsp;&mdash;
-		      can put less stuff between you and your router,
-		      since most things are on the floor!
-		</li>
-	        <li>Buy your own Wi-Fi access point.
-		    Since ISPs charge around $15 a month for rentals ($180 a year),
-		      a modem / router combo pays for itself within a year.
-		    You can probably get much better performance while saving money.
-		</li>
-	      </ul>
-	    </p>
-	  </div>
+      <p class=extras>
+        <span data-toggle="wifi_more" class="toggle-button" id=bw_more_tog>+ Learn more</span> <br>
+      </p>
+      <div id=wifi_more class=learn_more>
+        <p>
+          Wi-Fi is often the weakest link in a network connection.
+          There are some simple steps you can take to improve performance:
+          <ul>
+        <li>
+            Move your Wi-Fi away from big chunks of metal like dishwashers or radiators.
+            These can really block the signal!
+        </li>
+         <li>
+            Similarly, just putting the router "high up"&nbsp;&mdash;
+              on a bookshelp or cabinet&nbsp;&mdash;
+              can put less stuff between you and your router,
+              since most things are on the floor!
+        </li>
+            <li>Buy your own Wi-Fi access point.
+            Since ISPs charge around $15 a month for rentals ($180 a year),
+              a modem / router combo pays for itself within a year.
+            You can probably get much better performance while saving money.
+        </li>
+          </ul>
+        </p>
+      </div>
 
-	  <p class=extras>
-	    <span data-toggle="wifi_plot" data-toggle-defer="plots-trials" class="toggle-button toggle-button-deferred" id="wifi_plot_tog">+ Recent network bandwidth tests</span>
-	  </p>
-	  <div id="wifi_plot" class="learn_more"></div>
-	</div>
+      <p class=extras>
+        <span data-toggle="wifi_plot" data-toggle-defer="plots-trials" class="toggle-button toggle-button-deferred" id="wifi_plot_tog">+ Recent network bandwidth tests</span>
+      </p>
+      <div id="wifi_plot" class="learn_more"></div>
+    </div>
 
-	<div class="col-3">
+    <div class="col-3">
       <div class="dashval ok">
         <div class=values id=wifi_bw><div class="loader"></div></div>
         <div class=units>megabits per second</div>
@@ -266,36 +268,36 @@
         <span class="spinner-border spinner-border-sm test-disabled" role="status" aria-hidden="true"></span>
         <i class="bi bi-play-circle test-enabled"></i>
       </button>
-	</div>
+    </div>
     <div class="col-2"></div>
 
     </div>
 
     <div class="row d-flex align-items-start dashrow">
 
-      	<div class="col-2"></div>
+          <div class="col-2"></div>
         <div class="col-5">
-          <h2>Latency.</h2>
+          <h3>Latency.</h3>
 
           <p>
           <em>Latency</em> is the amount of time that it takes
-	      to reach a service on the Internet, like Wikipedia or YouTube.
-	    This is measured in milliseconds: thousandths of a second.
+          to reach a service on the Internet, like Wikipedia or YouTube.
+        This is measured in milliseconds: thousandths of a second.
           The greater the number the more that your Internet experience may be disrupted.
           </p>
           <p id="latency_summary" class="collapse">
-	    Your latency to Google is
-	      <span id=text_latency_interp>similar to other</span> households' in the U.S.
+        Your latency to Google is
+          <span id=text_latency_interp>similar to other</span> households' in the U.S.
           </p>
           <p id="latency_empty" class="collapse">
         Measurements of your Internet latency will be collected here.
           </p>
 
-	  <p class=extras>
-	    <span data-toggle="latency_more" class="toggle-button" id=latency_more_tog>+ Learn more</span>
-	  </p>
-	  <div id=latency_more class=learn_more>
-	    <p>
+      <p class=extras>
+        <span data-toggle="latency_more" class="toggle-button" id=latency_more_tog>+ Learn more</span>
+      </p>
+      <div id=latency_more class=learn_more>
+        <p>
         Latencies depend on your Internet service &ndash; including your WiFi &ndash; and on how requested applications are served.
         For example, Wikipedia is hosted on the West Coast, while services such as Google and the University of Chicago website are hosted on "Content Distribution Networks" (CDNs), which replicate content across the country, keeping it close to consumers wherever they are. That physical distance contributes to how long it takes to reach a service online.
         </p>
@@ -305,122 +307,122 @@
         <p>
         On the other hand, if this is only a problem when, for example, another member of your household is watching videos or playing games, then it's possible your service suffers from <em>latency under load</em>.
         </p>
-	  </div>
+      </div>
 
-	  <p id=latency_plot_tog class="extras collapse">
-	    <span data-toggle="latency_plot" data-toggle-defer="plots" class="toggle-button toggle-button-deferred">+ My latency over time</span>
-	  </p>
-	  <div id=latency_plot class=learn_more></div>
+      <p id=latency_plot_tog class="extras collapse">
+        <span data-toggle="latency_plot" data-toggle-defer="plots" class="toggle-button toggle-button-deferred">+ My latency over time</span>
+      </p>
+      <div id=latency_plot class=learn_more></div>
 
-	</div>
+    </div>
 
 
-	<div class="col-3">
+    <div class="col-3">
     <div class="dashval ok">
       <div class=values><span id=latency><div class="loader"></div></span></div>
       <div class=units>milliseconds</div>
     </div>
-	</div>
-      	<div class="col-2"></div>
+    </div>
+          <div class="col-2"></div>
 
     </div>
 
     <!-- consumption stat requires hardware we're not currently rolling out: collapse -->
     <div class="row d-flex align-items-start dashrow collapse">
 
-      	<div class="col-2"></div>
+          <div class="col-2"></div>
         <div class="col-5">
-          <h2>Peak consumption.</h2>
+          <h3>Peak consumption.</h3>
 
           <p>
-	    Your Network Measurement Device can record how much data you transmit
-	      per minute and per day.
-	    These data are recorded only if you elect to turn this feature on.
+        Your Network Measurement Device can record how much data you transmit
+          per minute and per day.
+        These data are recorded only if you elect to turn this feature on.
           </p>
-	  <p>
-	    At right is the single minute in the last 24 hours
-	      with the highest download bandwidth.
-	    Comparing this number with the bandwidth you buy
-	      can help you decide if you need all the bandwidth you buy&nbsp;&mdash;
-	      or if more would help.
+      <p>
+        At right is the single minute in the last 24 hours
+          with the highest download bandwidth.
+        Comparing this number with the bandwidth you buy
+          can help you decide if you need all the bandwidth you buy&nbsp;&mdash;
+          or if more would help.
           </p>
 
-	  <p class=extras>
-	    <span data-toggle="cons_more" class="toggle-button" id=cons_more_tog>+ Learn more</span> <br>
-	  </p>
-	  <div id=cons_more class=learn_more>
-	    <p>
-	      Even for "intensive" applications like streaming movies or video conferencing,
-	      	most applications only use 1 or 2 Mbps of bandwidth;
-		you can probably find video calls as "boxes"
-		in your upstream consumption.
-	      True HD video uses somewhat more, up to 5 Mbps.
-	      However this is only in the downstream direction,
-	      	which is usually better-provisioned.
-	      For normal browsing, demand on the connection is "peaky":
-	      	you click on a site and there's a "peak" in demand
-		that subsides a fraction of a second later, when the site has finished loading.
-	      But almost any connection suffices for this sort of simple browsing.
-	      The very-highest levels of bandwidth use come from downloading multi-gigabyte files,
-	      	but this is rare for most people.
-	      Using the plot below, you can assess how often you really "saturate" your connection.
-	    </p>
+      <p class=extras>
+        <span data-toggle="cons_more" class="toggle-button" id=cons_more_tog>+ Learn more</span> <br>
+      </p>
+      <div id=cons_more class=learn_more>
+        <p>
+          Even for "intensive" applications like streaming movies or video conferencing,
+              most applications only use 1 or 2 Mbps of bandwidth;
+        you can probably find video calls as "boxes"
+        in your upstream consumption.
+          True HD video uses somewhat more, up to 5 Mbps.
+          However this is only in the downstream direction,
+              which is usually better-provisioned.
+          For normal browsing, demand on the connection is "peaky":
+              you click on a site and there's a "peak" in demand
+        that subsides a fraction of a second later, when the site has finished loading.
+          But almost any connection suffices for this sort of simple browsing.
+          The very-highest levels of bandwidth use come from downloading multi-gigabyte files,
+              but this is rare for most people.
+          Using the plot below, you can assess how often you really "saturate" your connection.
+        </p>
 
-	  </div>
+      </div>
 
-	  <p class=extras>
-	    <span data-toggle="cons_plot" data-toggle-defer="plots" class="toggle-button toggle-button-deferred" id=cons_plot_tog>+ My consumption over time</span>
-	  </p>
-	  <div id=cons_plot class=learn_more></div>
+      <p class=extras>
+        <span data-toggle="cons_plot" data-toggle-defer="plots" class="toggle-button toggle-button-deferred" id=cons_plot_tog>+ My consumption over time</span>
+      </p>
+      <div id=cons_plot class=learn_more></div>
 
-	</div>
+    </div>
 
-	<div class="col-3">
+    <div class="col-3">
     <div class="dashval ok">
       <div class=values id=consumption><div class="loader"></div></div>
       <div class=units>megabits per second</div>
     </div>
-	</div>
-      	<div class="col-2"></div>
+    </div>
+          <div class="col-2"></div>
 
     </div>
 
     <!-- device count requires platform feature not yet available: collapse -->
     <div class="row d-flex align-items-start dashrow collapse">
-      	<div class="col-2"></div>
+          <div class="col-2"></div>
         <div class="col-5">
-          <h2>Connected devices.</h2>
+          <h3>Connected devices.</h3>
 
-	  <p>
-	    Many modern electronic devices connect to your Wi-Fi.
-	    Your Network Measurement Device records the number of unique devices that
-	      connect to your router over time.
+      <p>
+        Many modern electronic devices connect to your Wi-Fi.
+        Your Network Measurement Device records the number of unique devices that
+          connect to your router over time.
           </p>
 
-	  <p class=extras>
-	    <span data-toggle="dev_more" class="toggle-button" id=dev_more_tog>+ Learn more</span> <br>
-	  </p>
-	  <div id=dev_more class=learn_more>
-	    <p>
-	      Every network-connected device has a unique identifier, called a MAC address.
-	      Your Network Measurement Device requests a count of these identifiers from your router, every five minutes.
-	    </p>
-	  </div>
+      <p class=extras>
+        <span data-toggle="dev_more" class="toggle-button" id=dev_more_tog>+ Learn more</span> <br>
+      </p>
+      <div id=dev_more class=learn_more>
+        <p>
+          Every network-connected device has a unique identifier, called a MAC address.
+          Your Network Measurement Device requests a count of these identifiers from your router, every five minutes.
+        </p>
+      </div>
 
-	  <p class=extras>
-	    <span data-toggle="dev_plot" data-toggle-defer="plots" class="toggle-button toggle-button-deferred" id=dev_plot_tog>+ My devices over time</span>
-	  </p>
-	  <div id=dev_plot class=learn_more></div>
+      <p class=extras>
+        <span data-toggle="dev_plot" data-toggle-defer="plots" class="toggle-button toggle-button-deferred" id=dev_plot_tog>+ My devices over time</span>
+      </p>
+      <div id=dev_plot class=learn_more></div>
 
-	</div>
+    </div>
 
-	<div class="col-3">
+    <div class="col-3">
     <div class="dashval ok">
       <div class=values id=ndev_week><div class="loader"></div></div>
       <div class=units>devices in the last week</div>
     </div>
-	</div>
-      	<div class="col-2"></div>
+    </div>
+          <div class="col-2"></div>
 
     </div>
 
