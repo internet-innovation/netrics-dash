@@ -31,6 +31,7 @@ class Build(lib.DockerCommand):
                             metavar='STAGE',
                             help="dashboard stage (\"flavor\") to build "
                                  f"(default: {self.dashboard_default}, or one of: %(choices)s)")
+        parser.add_argument('--env', metavar='ENV', help="zappa stage-env (for lambda only)")
         parser.add_argument('--aws-repo', help="URI of AWS ECR to push Lambda images")
         parser.add_argument('--ndt-cache', default=(config.REPO_PATH / '.ndt-server'),
                             metavar='PATH', type=pathlib.Path,
@@ -135,12 +136,17 @@ class Build(lib.DockerCommand):
                         for repo_tag in repo_tags
                         for tag_arg in self.tag_args(repo_tag, self.args.version)]
 
+        env_args = (
+            '--build-arg', f'STAGE_ENV={self.args.env}',
+        ) if self.args.env and 'lambda' in self.args.target else ()
+
         yield self.local.FG, self.docker[
             'buildx',
             'build',
             '--target', self.args.target,
             '--platform', 'linux/amd64',
             '--build-arg', f'APPVERSION={self.args.version}',
+            env_args,
             tag_args,
             config.REPO_PATH,
             self.action,

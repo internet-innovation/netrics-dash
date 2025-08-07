@@ -144,7 +144,10 @@ EOF
 
 FROM serve-base AS serve-lambda
 
-LABEL buildflavor=serve-lambda
+ARG STAGE_ENV
+
+LABEL buildflavor=serve-lambda \
+      stage_env="$STAGE_ENV"
 
 ENV APP_DATABASE="file:auto:/tmp/$APPNAME/var/lib/data.sqlite"         \
     APP_PREFIX=/<:deviceid>/                                           \
@@ -172,7 +175,8 @@ COPY --from=build-lambda /export/ /usr/local/lib/python3.13/site-packages/
 RUN --mount=type=bind,source=zappa_settings.toml,target=/mnt/zappa_settings.toml <<-EOF
     python -m zappa.cli save-python-settings-file \
         -s /mnt/zappa_settings.toml \
-	-o /usr/src/"$APPNAME"/srv/zappa_settings.py
+	-o /usr/src/"$APPNAME"/srv/zappa_settings.py \
+	$STAGE_ENV
 EOF
 
 USER "$APPNAME"
