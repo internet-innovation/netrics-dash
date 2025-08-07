@@ -22,21 +22,29 @@ class CachingS3PathSelector(s3path_internals._Selector):
 
     _list_cache_ = S3_LIST_CACHE
 
-    def _deep_cached_dir_scan(self):
+    def select(self):
         if self._full_keys:
             raise NotImplementedError("only directory listings currently supported")
 
-        result = self._list_cache_.get(self._path)
-        if result is not None:
-            yield from result
+        for path in self._caching_dir_scan():
+            if self.match(str(path)):
+                yield path
+
+    def _caching_dir_scan(self):
+        paths = self._list_cache_.get(self._path)
+        if paths is not None:
+            yield self._path
+            yield from paths
             return
 
-        result = []
-        for item in super()._deep_cached_dir_scan():
-            result.append(item)
-            yield item
+        paths = []
+        for target in self._deep_cached_dir_scan():
+            path = type(self._path)(f'{self._path.parser.sep}{self._path.bucket}{target}')
+            if path != self._path:
+                paths.append(path)
+            yield path
 
-        self._list_cache_.set(self._path, result)
+        self._list_cache_.set(self._path, paths)
 
 
 class CachingS3Path(s3path.S3Path):
@@ -54,6 +62,7 @@ class CachingS3Path(s3path.S3Path):
             yield from super().glob(pattern,
                                     case_sensitive=case_sensitive,
                                     recurse_symlinks=recurse_symlinks)
+            return
 
         #
         # taken from s3path
@@ -108,6 +117,6 @@ class CachingS3Path(s3path.S3Path):
             if not self._get_cache_.set(self, contents):
                 return io.BytesIO(contents) if 'b' in mode else io.StringIO(contents)
 
-            cached = self._get_cache_.get(self)
+            cached = self._get_cache_._get_path_(self)
 
         return cached.open(mode, *args, **kwargs)
