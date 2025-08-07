@@ -86,14 +86,21 @@ const subjectiveReport = {
 
 
 const ispStats = (() => {
-  let $data = null
-  let $request = null
+  let $currentData = null
+  let $currentRequest = null
+
+  let $weekData = null
+  let $weekRequest = null
 
   function cleanNumber (value) {
     return value >= 10 ? Math.round(value) : value
   }
 
-  function updateView (data) {
+  function ooklaReceived (data) {
+    return data["ookla_dl"] !== null && data['ookla_ul'] !== null
+  }
+
+  function updateCurrentView (data) {
     /* Update view with received data.
      */
 
@@ -107,21 +114,18 @@ const ispStats = (() => {
     let elem = document.getElementById("ookla_dl")
     let pardiv = elem.parentElement.parentElement
 
-    const ooklaReceived = data["ookla_dl"] !== null && data['ookla_ul'] !== null
-
-    if      (! ooklaReceived)       dataView.setColorClass(pardiv, "null");
+    if      (! ooklaReceived(data))       dataView.setColorClass(pardiv, "null");
     else if (data["ookla_dl"] > 50) dataView.setColorClass(pardiv, "good");
     else if (data["ookla_dl"] < 25) dataView.setColorClass(pardiv, "bad");
     else                            dataView.setColorClass(pardiv, "ok");
 
-    document.getElementById("bw_slash").innerHTML = ooklaReceived ? "/" : "&mdash;"
+    document.getElementById("bw_slash").innerHTML = ooklaReceived(data) ? "/" : "&mdash;"
 
     document.getElementById("text_ookla_dl").innerHTML = cleanNumber(data["ookla_dl"])
     document.getElementById("text_ookla_ul").innerHTML = cleanNumber(data["ookla_ul"])
 
     const text_bw_interp    = document.getElementById("text_bw_interp")
     const text_bw_fcc       = document.getElementById("text_bw_fcc")
-    const text_bw_stability = document.getElementById("text_bw_stability")
 
     if      (data["ookla_dl"] > 500) text_bw_interp.innerHTML = "higher than most";
     else if (data["ookla_dl"] < 30)  text_bw_interp.innerHTML = "lower than most";
@@ -131,13 +135,6 @@ const ispStats = (() => {
       text_bw_fcc.innerHTML = "exceeds";
     else
       text_bw_fcc.innerHTML = "does not meet";
-
-    if (data["ookla_dl_sd"] > 0.15 * data["ookla_dl"])
-      text_bw_stability.innerHTML = "However, your bandwidth varies significantly";
-    else text_bw_stability.innerHTML = "Your bandwidth is consistent";
-
-    if (ooklaReceived) dataView.show("bw_summary");
-    else               dataView.show("bw_empty");
 
     // Latency
     elem = document.getElementById("latency")
@@ -161,21 +158,47 @@ const ispStats = (() => {
     else                 dataView.show("latency_empty");
   }
 
-  function update (data) {
-    $data = data
-    updateView(data)
+  function updateWeekView (data) {}
+
+  function updateCurrent (data) {
+    $currentData = data
+    updateCurrentView(data)
+  }
+
+  function updateWeek (data) {
+    $weekData = data
+    updateWeekView(data)
+  }
+
+  function updateDone (currentData, weekData) {
+    const text_bw_stability = document.getElementById("text_bw_stability")
+
+    if (weekData["ookla_dl_sd"] > 0.15 * currentData["ookla_dl"])
+      text_bw_stability.innerHTML = "However, your throughput varies significantly";
+    else text_bw_stability.innerHTML = "Your throughput is consistent";
+
+    if (ooklaReceived(currentData)) dataView.show("bw_summary");
+    else                            dataView.show("bw_empty");
   }
 
   return {
     get data () {
-      return $data
+      return {...$currentData, ...$weekData}
     },
-    get request () {
-      return $request
+    get requests () {
+      return [$currentRequest, $weekRequest]
+    },
+    get currentRequest () {
+      return $currentRequest;
+    },
+    get weekRequest () {
+      return $weekRequest;
     },
     load () {
-      $request = $.getJSON('stats', update)
-      return $request
+      $currentRequest = $.getJSON('stats/current', updateCurrent)
+      $weekRequest = $.getJSON('stats/week', updateWeek)
+      $.when.apply($, this.requests).done(updateDone)
+      return this.requests
     },
   }
 })()
@@ -204,7 +227,7 @@ const ispPlots = {
       }
     ];
 
-    const bw_layout = Object.assign({"yaxis": {title: {text: 'Bandwidth [Mbps]'}}}, layout);
+    const bw_layout = Object.assign({"yaxis": {title: {text: 'Throughput [Mbps]'}}}, layout);
 
     if (data.bw.ts !== null && (data.bw.dl !== null || data.bw.ul !== null)) {
       Plotly.newPlot('bw_plot', bw_series, bw_layout, config)
@@ -537,10 +560,10 @@ if (typeof panelConf === 'undefined') {
 
 ispStats.load()
 
-networkStats.load(ispStats.request)
+networkStats.load(ispStats.currentRequest)
 
 ispPlots.load()
 
 dataView.elementToggle.init()
 
-addEventListener('ndt7update', () => networkStats.load(ispStats.request))
+addEventListener('ndt7update', () => networkStats.load(ispStats.currentRequest))
