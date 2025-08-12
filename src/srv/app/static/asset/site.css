@@ -12,8 +12,7 @@ h2 {
 
 p {
  font-size: 20px;
- margin: 20px 0;
- padding-right: 75px;
+ margin: 1rem 0;
 }
 
 p + p {
@@ -33,7 +32,7 @@ footer > p {
 }
 
 footer img.brand {
-  width: 2%;
+  width: 100px;
 }
 
 ul.dropdown-menu>li {
@@ -90,6 +89,7 @@ ul.dropdown-menu>li {
 
 .dashboard {
   padding-top: 35px;
+  max-width: 1300px;
 }
 
 .dashrow {
@@ -97,22 +97,22 @@ ul.dropdown-menu>li {
 }
 
 .dashval {
-  float: right;
-
-  display: inline-block;
-  margin: 45px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
   border-radius: 20px;
-  padding: 18px;
   text-align: center;
 
-  width: 100%;
-  max-width: 315px;
-  min-height: 150px;
+  min-height: 18vw;
+
+  padding: 1.25rem;
 }
 
-.dashval * {
-  vertical-align: sub;
+@media all and (min-width: 1400px) {
+  .dashval {
+    min-height: 10vw;
+  }
 }
 
 .btn-test {
@@ -152,7 +152,7 @@ ul.dropdown-menu>li {
 }
 
 .learn_more {
-  padding: 0 25px;
+  padding: 0 15px;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
@@ -249,13 +249,13 @@ ul.dropdown-menu>li {
 }
 
 .values {
-  font-size: 50px;
-  line-height: 45px;
+  font-size: 4rem;
+  line-height: 4rem;
 }
 
 .units {
-  font-size: 18px;
-  line-height: 18px;
+  font-size: 1.25rem;
+  line-height: 3rem;
 }
 
 .center{

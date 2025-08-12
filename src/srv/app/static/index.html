@@ -40,8 +40,7 @@
     </div>
 
     <div class="d-flex">
-      <div class="col-2"></div>
-      <div class="col-8 extension-notice collapse d-flex justify-content-between" title="Click to dismiss…">
+      <div class="col-12 extension-notice collapse d-flex justify-content-between" title="Click to dismiss…">
         <p>
           Home Network Speed Test browser extension
 
@@ -67,29 +66,16 @@
           Install <i class="bi bi-gear-fill"></i>
         </a>
       </div>
-      <div class="col-2"></div>
     </div>
 
-    <div class="dashboard">
+    <div class="dashboard mx-auto">
 
     <div class="row d-flex align-items-start dashrow collapse">
-          <div class="col-2"></div>
-        <div class="col-5">
-          <h2>Your experience.</h2>
+      <div class=col-12>
+        <h2>Your experience.</h2>
+      </div>
 
-          <p>
-        Below, we list a number of <em>technical</em> measures of Internet peformance.
-        Ultimately, what matters is whether or not your connection is working for <em>you</em>.
-        This is called "quality of experience" or "subjective experience."
-          <p>
-        By flagging when you experience Internet connection problems&nbsp;&mdash;
-          dropped calls or poor video, for example&nbsp;&mdash; you help us learn what connection
-          parameters matter in practice.
-        Note that we cannot <em>solve</em> these issues for you: we are not your Internet Service Provider (ISP).
-          </p>
-    </div>
-
-    <div class="col-3">
+    <div class="col-lg-4 order-lg-3 my-3 my-lg-0 col-xxl-3 offset-xxl-1">
         <div class="dashval attn dropdown" id="survey_box">
           <button class="btn btn-primary btn-block dropdown-toggle survey" type="button" id="subj_button" data-bs-toggle="dropdown" aria-expanded="false">
         <span>How is your<br>Internet?</span>
@@ -103,37 +89,61 @@
       </div>
     </div>
 
-          <div class="col-2"></div>
+        <div class="col-lg-8 order-lg-2 pe-lg-4">
+
+          <p>
+        Below, we list a number of <em>technical</em> measures of Internet peformance.
+        Ultimately, what matters is whether or not your connection is working for <em>you</em>.
+        This is called "quality of experience" or "subjective experience."
+          <p>
+        By flagging when you experience Internet connection problems&nbsp;&mdash;
+          dropped calls or poor video, for example&nbsp;&mdash; you help us learn what connection
+          parameters matter in practice.
+        Note that we cannot <em>solve</em> these issues for you: we are not your Internet Service Provider (ISP).
+          </p>
+    </div>
 
     </div>
 
 
     <div class="row d-flex align-items-start dashrow">
-          <div class="col-2"></div>
-        <div class="col-8">
+        <div class="col-12">
           <h2>Your data</h2>
           <p class="fs-4">
-          We often hear about Internet “speed.” Speed contains two distinct components: <em>throughput</em> and <em>latency</em>.
+            We often hear about Internet “speed.” Speed contains two distinct components: <em>throughput</em> and <em>latency</em>.
           </p>
         </div>
-          <div class="col-2"></div>
     </div>
 
     <div class="row d-flex align-items-start dashrow">
-
-          <div class="col-2"></div>
-        <div class="col-5">
+        <div class=col-12>
           <h3>Throughput</h3>
+      </div>
+
+    <div class="col-lg-4 order-lg-3 my-3 my-lg-0 col-xxl-3 offset-xxl-1">
+    <div class="dashval ok">
+      <div class=values>
+        <span id=ookla_dl></span>
+        <span id=bw_slash>
+                <div class="loader"></div>
+        </span>
+              <span id=ookla_ul></span>
+      </div>
+      <div class=units>megabits per second</div>
+    </div>
+</div>
+
+        <div class="col-lg-8 order-lg-2 pe-lg-4">
 
           <p>
-          When Internet Service Providers (ISPs) advertise their “speed” they're often just referring to throughput.
+            When Internet Service Providers (ISPs) advertise their “speed” they're often just referring to throughput.
           </p>
           <p>
-          Throughput is the amount of data that you can receive from and send to the Internet within a given amount of time. Your throughput may vary over the course of the day; however, it should consistently reach close to the "speed" or "bandwidth" advertised by your Internet service plan.
+            Throughput is the amount of data that you can receive from and send to the Internet within a given amount of time. Your throughput may vary over the course of the day; however, it should consistently reach close to the "speed" or "bandwidth" advertised by your Internet service plan.
           </p>
 
         <p id="bw_summary" class="collapse">
-        Your most recent throughput of
+          Your most recent throughput of
         <span id=text_ookla_dl>100</span> / <span id=text_ookla_ul>20</span>&nbsp;Mbps (download / upload)
         <span id=bw_interp class="collapse">is<span id=text_bw_interp>similar to other </span> households' in the U.S. It </span>
         <span id=text_bw_fcc>exceeds</span> the federal standard for being "served" by broadband Internet
@@ -175,28 +185,29 @@
 
     </div>
 
-    <div class="col-3">
-    <div class="dashval ok">
-      <div class=values>
-        <span id=ookla_dl></span>
-        <span id=bw_slash>
-                <div class="loader"></div>
-        </span>
-              <span id=ookla_ul></span>
-      </div>
-      <div class=units>megabits per second</div>
-    </div>
-    </div>
-          <div class="col-2"></div>
-
     </div>
 
 
     <div id="wifi" class="row d-flex align-items-start dashrow collapse">
+      <div class=col-12>
+        <h3>Network bandwidth.</h3>
+      </div>
 
-          <div class="col-2"></div>
-        <div class="col-5">
-          <h3>Network bandwidth.</h3>
+    <div class="col-lg-4 order-lg-3 my-3 my-lg-0 col-xxl-3 offset-xxl-1">
+      <div class="dashval ok">
+        <div class=values id=wifi_bw><div class="loader"></div></div>
+        <div class=units>megabits per second</div>
+      </div>
+      <button id="test-network" type="button" class="attn btn btn-test" disabled>
+        <i class="bi bi-router icon-short"></i>
+        Test network
+        <!-- <i class="bi bi-arrow-clockwise test-disabled"></i> -->
+        <span class="spinner-border spinner-border-sm test-disabled" role="status" aria-hidden="true"></span>
+        <i class="bi bi-play-circle test-enabled"></i>
+      </button>
+    </div>
+
+        <div class="col-lg-8 order-lg-2 pe-lg-4">
 
           <p>
         Your home network bandwidth is how much data your (wireless or Wi-Fi)
@@ -256,28 +267,21 @@
       <div id="wifi_plot" class="learn_more"></div>
     </div>
 
-    <div class="col-3">
-      <div class="dashval ok">
-        <div class=values id=wifi_bw><div class="loader"></div></div>
-        <div class=units>megabits per second</div>
-      </div>
-      <button id="test-network" type="button" class="attn btn btn-test" disabled>
-        <i class="bi bi-router icon-short"></i>
-        Test network
-        <!-- <i class="bi bi-arrow-clockwise test-disabled"></i> -->
-        <span class="spinner-border spinner-border-sm test-disabled" role="status" aria-hidden="true"></span>
-        <i class="bi bi-play-circle test-enabled"></i>
-      </button>
-    </div>
-    <div class="col-2"></div>
-
     </div>
 
     <div class="row d-flex align-items-start dashrow">
+      <div class=col-12>
+        <h3>Latency.</h3>
+      </div>
 
-          <div class="col-2"></div>
-        <div class="col-5">
-          <h3>Latency.</h3>
+    <div class="col-lg-4 order-lg-3 my-3 my-lg-0 col-xxl-3 offset-xxl-1">
+    <div class="dashval ok">
+      <div class=values><span id=latency><div class="loader"></div></span></div>
+      <div class=units>milliseconds</div>
+    </div>
+    </div>
+
+        <div class="col-lg-8 order-lg-2 pe-lg-4">
 
           <p>
           <em>Latency</em> is the amount of time that it takes
@@ -316,23 +320,22 @@
 
     </div>
 
-
-    <div class="col-3">
-    <div class="dashval ok">
-      <div class=values><span id=latency><div class="loader"></div></span></div>
-      <div class=units>milliseconds</div>
-    </div>
-    </div>
-          <div class="col-2"></div>
-
     </div>
 
     <!-- consumption stat requires hardware we're not currently rolling out: collapse -->
     <div class="row d-flex align-items-start dashrow collapse">
+      <div class=col-12>
+        <h3>Peak consumption.</h3>
+      </div>
 
-          <div class="col-2"></div>
-        <div class="col-5">
-          <h3>Peak consumption.</h3>
+    <div class="col-lg-4 order-lg-3 my-3 my-lg-0 col-xxl-3 offset-xxl-1">
+    <div class="dashval ok">
+      <div class=values id=consumption><div class="loader"></div></div>
+      <div class=units>megabits per second</div>
+    </div>
+    </div>
+
+        <div class="col-lg-8 order-lg-2 pe-lg-4">
 
           <p>
         Your Network Measurement Device can record how much data you transmit
@@ -377,21 +380,22 @@
 
     </div>
 
-    <div class="col-3">
-    <div class="dashval ok">
-      <div class=values id=consumption><div class="loader"></div></div>
-      <div class=units>megabits per second</div>
-    </div>
-    </div>
-          <div class="col-2"></div>
-
     </div>
 
     <!-- device count requires platform feature not yet available: collapse -->
     <div class="row d-flex align-items-start dashrow collapse">
-          <div class="col-2"></div>
-        <div class="col-5">
+        <div class=col-12>
           <h3>Connected devices.</h3>
+      </div>
+
+    <div class="col-lg-4 order-lg-3 my-3 my-lg-0 col-xxl-3 offset-xxl-1">
+    <div class="dashval ok">
+      <div class=values id=ndev_week><div class="loader"></div></div>
+      <div class=units>devices in the last week</div>
+    </div>
+    </div>
+
+        <div class="col-lg-8 order-lg-2 pe-lg-4">
 
       <p>
         Many modern electronic devices connect to your Wi-Fi.
@@ -415,14 +419,6 @@
       <div id=dev_plot class=learn_more></div>
 
     </div>
-
-    <div class="col-3">
-    <div class="dashval ok">
-      <div class=values id=ndev_week><div class="loader"></div></div>
-      <div class=units>devices in the last week</div>
-    </div>
-    </div>
-          <div class="col-2"></div>
 
     </div>
 
