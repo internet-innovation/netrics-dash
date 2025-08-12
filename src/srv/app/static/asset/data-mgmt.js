@@ -170,15 +170,15 @@ const ispStats = (() => {
     updateWeekView(data)
   }
 
-  function updateDone (currentData, weekData) {
+  function updateDone () {
     const text_bw_stability = document.getElementById("text_bw_stability")
 
-    if (weekData["ookla_dl_sd"] > 0.15 * currentData["ookla_dl"])
+    if ($weekData["ookla_dl_sd"] > 0.15 * $currentData["ookla_dl"])
       text_bw_stability.innerHTML = "However, your throughput varies significantly";
     else text_bw_stability.innerHTML = "Your throughput is consistent";
 
-    if (ooklaReceived(currentData)) dataView.show("bw_summary");
-    else                            dataView.show("bw_empty");
+    if (ooklaReceived($currentData)) dataView.show("bw_summary");
+    else                             dataView.show("bw_empty");
   }
 
   return {
