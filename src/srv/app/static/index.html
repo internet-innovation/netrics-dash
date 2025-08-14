@@ -31,13 +31,22 @@
 
 <body>
 
-  <div class="container-fluid">
+<div class="headbar">
+  <div class="row dashsection mx-auto">
+  <div class="col-auto d-none d-sm-flex align-items-center justify-content-center px-0">
+    <a href="https://internetequity.uchicago.edu/" target="_blank">
+      <img class="brand navbar-brand" src="/static/img/UChicago_Shield_2Color_DarkGreystone_WhiteBorder.svg" width=124 height=150>
+    </a>
+  </div>
+  <div class="col-12 col-sm-10">
+      <h1>
+          Internet Performance Dashboard
+      </h1>
+  </div>
+  </div>
+</div>
 
-    <div class=row>
-      <div class="headbar col-xs-8">
-        <h1>Internet Performance Dashboard</h1>
-      </div>
-    </div>
+  <div class="container-fluid">
 
     <div class="d-flex">
       <div class="col-12 extension-notice collapse d-flex justify-content-between" title="Click to dismiss…">
@@ -68,7 +77,7 @@
       </div>
     </div>
 
-    <div class="dashboard mx-auto">
+    <div class="dashboard dashsection mx-auto">
 
     <div class="row d-flex align-items-start dashrow collapse">
       <div class=col-12>
@@ -271,7 +280,7 @@
 
     <div class="row d-flex align-items-start dashrow">
       <div class=col-12>
-        <h3>Latency.</h3>
+        <h3>Latency</h3>
       </div>
 
     <div class="col-lg-4 order-lg-3 my-3 my-lg-0 col-xxl-3 offset-xxl-1">
@@ -284,7 +293,7 @@
         <div class="col-lg-8 order-lg-2 pe-lg-4">
 
           <p>
-          <em>Latency</em> is the amount of time that it takes
+          Latency is the amount of time that it takes
           to reach a service on the Internet, like Wikipedia or YouTube.
         This is measured in milliseconds: thousandths of a second.
           The greater the number the more that your Internet experience may be disrupted.
@@ -428,11 +437,12 @@
   <footer>
     <p>
       Internet Equity Initiative<br>
-      Data Science Institute<br>
       University of Chicago
     </p>
-    <p>
-      <img src="/static/img/cdac.svg" class="brand">
+    <p class="d-sm-none">
+      <a href="https://internetequity.uchicago.edu/" target="_blank">
+        <img class="brand" src="/static/img/UChicago_Shield_2Color_DarkGreystone_WhiteBorder.svg" width=124 height=150>
+      </a>
     </p>
   </footer>
 

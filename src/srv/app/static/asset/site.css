@@ -31,10 +31,6 @@ footer > p {
   text-align: center;
 }
 
-footer img.brand {
-  width: 100px;
-}
-
 ul.dropdown-menu>li {
   text-align: center;
 }
@@ -42,7 +38,16 @@ ul.dropdown-menu>li {
 .headbar {
   background-color: #444;
   margin-bottom: 15px;
-  padding: 0;
+  padding: 0 .75rem;
+}
+
+.brand {
+  width: auto;
+  max-height: 5rem;
+}
+
+.navbar-brand {
+  padding: 0.5rem 0;
 }
 
 .extension-notice {
@@ -87,9 +92,12 @@ ul.dropdown-menu>li {
     border-color: #0a58ca;
 }
 
+.dashsection {
+  max-width: 1300px;
+}
+
 .dashboard {
   padding-top: 35px;
-  max-width: 1300px;
 }
 
 .dashrow {
