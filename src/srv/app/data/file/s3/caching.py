@@ -1,11 +1,16 @@
+from __future__ import annotations
+import enum
 import io
 import sys
+from collections.abc import Iterable
 from typing import Self, Generator
 
 import s3path
+import valkey
 
 from app import conf
-from app.lib.cache import FileSystemCache, MemoryCache
+from app.lib.abstract import abstractmember
+from app.lib.cache import FileSystemCache, MemoryCache, SimpleCache
 
 try:
     s3path_internals = s3path.current_version
@@ -13,9 +18,84 @@ except AttributeError:
     s3path_internals = s3path.old_versions
 
 
-S3_LIST_CACHE = MemoryCache()
+S3Key = str | s3path.S3Path
 
-S3_GET_CACHE = FileSystemCache(conf.DATAFILE_S3_CACHE_PATH)
+
+class S3CacheDB(enum.IntEnum):
+
+    LIST = 0
+    GET = 1
+
+
+class ValKeyCache(SimpleCache):
+
+    _db_: S3CacheDB = abstractmember()
+
+    def __init__(self, url: str) -> None:
+        super().__init__()
+        self._client_ = valkey.from_url(url, db=self._db_.value, decode_responses=True)
+
+    def discard(self, key: S3Key) -> None:
+        self._client_.delete(str(key))
+
+
+class S3ListCacheValKey(ValKeyCache):
+
+    _db_ = S3CacheDB.LIST
+
+    def get(self, key: S3Key) -> set[CachingS3Path] | None:
+        cached = self._client_.smembers(str(key))
+
+        if cached:
+            self.hits += 1
+            return {CachingS3Path(value) for value in cached if value != ''}
+        else:
+            self.misses += 1
+            return None
+
+    def set(self, key: S3Key, values: Iterable[S3Key]) -> bool:
+        prepped = [str(value) for value in values] or ['']
+        count = self._client_.sadd(str(key), *prepped)
+        return bool(count)
+
+
+class S3GetCacheValKey(ValKeyCache):
+
+    _db_ = S3CacheDB.GET
+
+    def get(self, key: S3Key, decode=True) -> io.StringIO | None:
+        if not decode:
+            raise NotImplementedError("bytes not supported")
+
+        value = self._client_.get(str(key))
+
+        if value is None:
+            self.misses += 1
+            return value
+        else:
+            self.hits += 1
+            return io.StringIO(value)
+
+    def set(self, key: S3Key, value: str | bytes) -> bool:
+        return self._client_.set(str(key), value)
+
+
+match conf.DATAFILE_S3_CACHE_BACKEND:
+    case 'local':
+        S3_LIST_CACHE = MemoryCache()
+        S3_GET_CACHE = FileSystemCache(conf.DATAFILE_S3_CACHE_PATH)
+
+    case 'remote':
+        if not conf.DATAFILE_S3_CACHE_REMOTE:
+            raise ValueError("setting DATAFILE_S3_CACHE_BACKEND=remote requires that setting "
+                             "DATAFILE_S3_CACHE_REMOTE is not empty")
+
+        S3_LIST_CACHE = S3ListCacheValKey(conf.DATAFILE_S3_CACHE_REMOTE)
+        S3_GET_CACHE = S3GetCacheValKey(conf.DATAFILE_S3_CACHE_REMOTE)
+
+    case _:
+        raise ValueError(f"setting DATAFILE_S3_CACHE_BACKEND expects either "
+                         f"'local' or 'remote' not: {conf.DATAFILE_S3_CACHE_BACKEND!r}")
 
 
 class CachingS3PathSelector(s3path_internals._Selector):
@@ -108,15 +188,14 @@ class CachingS3Path(s3path.S3Path):
             self._get_cache_.discard(self)
             return super().open(mode, *args, **kwargs)
 
-        cached = self._get_cache_.get(self)
+        cached = self._get_cache_.get(self, decode=('b' not in mode))
 
         if cached is None:
             with super().open(mode) as fd:
                 contents = fd.read()
 
-            if not self._get_cache_.set(self, contents):
-                return io.BytesIO(contents) if 'b' in mode else io.StringIO(contents)
+            self._get_cache_.set(self, contents)
 
-            cached = self._get_cache_._get_path_(self)
+            return io.BytesIO(contents) if 'b' in mode else io.StringIO(contents)
 
-        return cached.open(mode, *args, **kwargs)
+        return cached
