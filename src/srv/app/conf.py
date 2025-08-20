@@ -130,5 +130,11 @@ DATAFILE_S3_BASE = config('DATAFILE_S3_BASE', default='')
 DATAFILE_S3_IGNORE = config('DATAFILE_S3_IGNORE', cast=Csv(delimiter=':'), default='')
 #
 #
+DATAFILE_S3_CACHE_BACKEND = config('DATAFILE_S3_CACHE_BACKEND', default='local')
+#
+#
 DATAFILE_S3_CACHE_PATH = config('DATAFILE_S3_CACHE_PATH',
                                 default=f'/var/cache/{APP_NAME}/data/file/s3/get/')
+#
+#
+DATAFILE_S3_CACHE_REMOTE = config('DATAFILE_S3_CACHE_REMOTE', default=None)

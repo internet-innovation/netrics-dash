@@ -1,4 +1,5 @@
 import abc
+import io
 import pathlib
 
 from loguru import logger as log
@@ -58,17 +59,22 @@ class FileSystemCache(SimpleCache):
     def discard(self, key: pathlib.PurePath) -> None:
         self._get_path_(key).unlink(missing_ok=True)
 
-    def get(self, key: pathlib.PurePath) -> pathlib.Path | None:
+    def get(self, key: pathlib.PurePath, decode=False) -> io.StringIO | io.BytesIO | None:
         path = self._get_path_(key)
 
-        if path.exists():
+        try:
+            with path.open('r' if decode else 'rb') as fd:
+                value = fd.read()
+        except FileNotFoundError:
+            self.misses += 1
+            return None
+        else:
             self.hits += 1
-            return path
+            return io.StringIO(value) if decode else io.BytesIO(value)
 
-        self.misses += 1
-        return None
-
-    def set(self, key: pathlib.PurePath, value: str | bytes) -> bool:
+    def set(self,
+            key: pathlib.PurePath,
+            value: str | bytes | io.TextIOBase | io.BufferedIOBase) -> bool:
         key_path = self._get_path_(key)
         key_dir = key_path.parent
 
@@ -78,7 +84,13 @@ class FileSystemCache(SimpleCache):
             log.error("failed to create cache directory: {}", key_dir)
             return False
 
-        if isinstance(value, bytes):
+        if isinstance(value, io.BufferedIOBase):
+            with key_path.open('wb') as fd:
+                fd.write(value.read())
+        elif isinstance(value, io.TextIOBase):
+            with key_path.open('w') as fd:
+                fd.write(value.read())
+        elif isinstance(value, bytes):
             key_path.write_bytes(value)
         else:
             key_path.write_text(value)

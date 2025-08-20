@@ -1,1 +1,2 @@
 s3path==0.6.4
+valkey[libvalkey]==6.1.1
