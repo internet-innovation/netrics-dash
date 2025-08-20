@@ -1,4 +1,5 @@
 from __future__ import annotations
+import datetime
 import enum
 import io
 import sys
@@ -42,6 +43,7 @@ class ValKeyCache(SimpleCache):
 class S3ListCacheValKey(ValKeyCache):
 
     _db_ = S3CacheDB.LIST
+    _ttl = datetime.timedelta(hours=2)
 
     def get(self, key: S3Key) -> set[CachingS3Path] | None:
         cached = self._client_.smembers(str(key))
@@ -55,19 +57,24 @@ class S3ListCacheValKey(ValKeyCache):
 
     def set(self, key: S3Key, values: Iterable[S3Key]) -> bool:
         prepped = [str(value) for value in values] or ['']
-        count = self._client_.sadd(str(key), *prepped)
+        (count, _expire) = (
+            self._client_.pipeline(transaction=True)
+            .sadd(str(key), *prepped)
+            .expire(str(key), self._ttl)
+        ).execute()
         return bool(count)
 
 
 class S3GetCacheValKey(ValKeyCache):
 
     _db_ = S3CacheDB.GET
+    _ttl = datetime.timedelta(weeks=2)
 
     def get(self, key: S3Key, decode=True) -> io.StringIO | None:
         if not decode:
             raise NotImplementedError("bytes not supported")
 
-        value = self._client_.get(str(key))
+        value = self._client_.getex(str(key), ex=self._ttl)
 
         if value is None:
             self.misses += 1
@@ -77,7 +84,7 @@ class S3GetCacheValKey(ValKeyCache):
             return io.StringIO(value)
 
     def set(self, key: S3Key, value: str | bytes) -> bool:
-        return self._client_.set(str(key), value)
+        return self._client_.set(str(key), value, ex=self._ttl)
 
 
 match conf.DATAFILE_S3_CACHE_BACKEND:
