@@ -11,8 +11,8 @@ def not_exc(x):
 
 
 def apidefault(*keys_excs, default=None):
-    keys = [*itertools.takewhile(not_exc, keys_excs)]
-    excs = [*itertools.takewhile(is_exc, keys_excs[len(keys):])]
+    keys = (*itertools.takewhile(not_exc, keys_excs),)
+    excs = (*itertools.takewhile(is_exc, keys_excs[len(keys):]),)
 
     if len(keys) + len(excs) < len(keys_excs):
         raise TypeError("unexpected signature")
