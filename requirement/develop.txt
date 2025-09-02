@@ -1,1 +1,2 @@
-argcmdr==0.7.0
+argcmdr==1.1.0
+zappa==0.60.2

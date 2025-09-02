@@ -37,7 +37,3 @@ class Data(lib.LocalPiCommand):
                    8 * size / period as mbaud
             from trial order by ts desc limit {args.limit}
         """
-
-    # add FGOut to whitelist to aid argcmdr in identifying output (when using return)
-    # FIXME: argcmdr should likely use isinstance(modifier, ExecutionModifier)
-    ndt.run_modifiers |= {lib.FGOut}
