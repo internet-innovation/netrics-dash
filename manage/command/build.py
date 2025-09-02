@@ -32,7 +32,9 @@ class Build(lib.DockerCommand):
                             help="dashboard stage (\"flavor\") to build "
                                  f"(default: {self.dashboard_default}, or one of: %(choices)s)")
         parser.add_argument('--env', metavar='ENV', help="zappa stage-env (for lambda only)")
-        parser.add_argument('--aws-repo', help="URI of AWS ECR to push Lambda images")
+        parser.add_argument('--aws-repo', default=config.AWS_REPO,
+                            help="URI of AWS ECR to push Lambda images" +
+                                 ' (default: %(default)s)' if config.AWS_REPO else '')
         parser.add_argument('--ndt-cache', default=(config.REPO_PATH / '.ndt-server'),
                             metavar='PATH', type=pathlib.Path,
                             help="path at which to cache the ndt-server repository "
@@ -45,7 +47,10 @@ class Build(lib.DockerCommand):
                             help="push images to remote repository "
                                  "(rather than load images locally)")
         parser.add_argument('--no-latest', action='store_false', dest='tag_latest',
-                            help="do NOT tag images as \"latest\"")
+                            help="do NOT tag images as \"latest\" (default)")
+        parser.add_argument('--latest', action='store_true', dest='tag_latest',
+                            help="tag images as \"latest\"")
+        parser.set_defaults(tag_latest=False)
 
     @cachedproperty
     def action(self):
@@ -163,6 +168,12 @@ class Build(lib.DockerCommand):
                 parser.error('--version required to build either dash or ndt-full')
         elif args.version:
             parser.error('--version only applies to dash and ndt-full builds')
+
+        if args.app == 'dash' and 'lambda' in args.target:
+            if not args.env:
+                parser.error(f'--env required to build dash with target {args.target}')
+            if args.push and not args.aws_repo:
+                parser.error('specify an --aws-repo to which to --push the dash lambda app')
 
         if not config.BINFMT_TARGET.exists():
             yield self.local.FG, self.docker[
