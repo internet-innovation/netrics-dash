@@ -204,99 +204,123 @@ const ispStats = (() => {
 })()
 
 
-const ispPlots = {
-  makePlots (data) {
-    var config = {"displayModeBar": false}
+const ispPlots = (function () {
+  const plotBuilder = {
+    async devices (data) {
+      // currently unsupported
+      const dev_series = [
+        { name: "Active", type: 'scatter',
+          x: data["devices"]["ts"], y: data["devices"]["active"]},
+        { name: "1-Day", type: 'scatter',
+          x: data["devices"]["ts"], y: data["devices"]["1d"]},
+        { name: "1-Week", type: 'scatter',
+          x: data["devices"]["ts"], y: data["devices"]["1w"]},
+        { name: "All Time", type: 'scatter',
+          x: data["devices"]["ts"], y: data["devices"]["tot"]}
+      ]
 
-    var layout = {
-      autosize: true,
-      height: 300,
-      margin: { l: 70, r: 60, b: 50, t: 20, pad: 0},
-      font : { size : 18 },
-      showlegend: true,
-      legend: {"orientation": "v", "x" : 0.05, "y" : 0.95}
-    };
-
-    // BANDWIDTH
-
-    var bw_series = [
-      { name: "Download", type: 'scatter',
-        x: data["bw"]["ts"], y: data["bw"]["dl"]},
-      { name: "Upload", type: 'scatter',
-        x: data["bw"]["ts"], y: data["bw"]["ul"]
-      }
-    ];
-
-    const bw_layout = Object.assign({"yaxis": {title: {text: 'Throughput [Mbps]'}}}, layout);
-
-    if (data.bw.ts !== null && (data.bw.dl !== null || data.bw.ul !== null)) {
-      Plotly.newPlot('bw_plot', bw_series, bw_layout, config)
-      .then(() => dataView.show('bw_plot_tog'));
-    }
-
-
-    // LATENCY
-
-    var lat_series = [
-      { name: "Google", type: 'scatter',
-        x: data["latency"]["ts"], y: data["latency"]["google"]},
-      { name: "Amazon", type: 'scatter',
-        x: data["latency"]["ts"], y: data["latency"]["amazon"]},
-      { name: "Wikipedia", type: 'scatter',
-        x: data["latency"]["ts"], y: data["latency"]["wikipedia"]},
-    ];
-
-    const lat_layout = Object.assign({"yaxis": {title: {text: 'Latency [ms]'}, range: [0, 75]}}, layout);
-
-    const latencyValueCount = Object.values(data.latency).reduce(
-      (count, value) => count + (value === null ? 0 : 1),
-      0
-    )
-    if (data.latency.ts !== null && latencyValueCount >= 2) {
-      Plotly.newPlot('latency_plot', lat_series, lat_layout, config)
-      .then(() => dataView.show('latency_plot_tog'));
-    }
-
-    // CONSUMPTION
-
-    var con_series = [
-      { name: "Download", type: 'scatter',
-        x: data["consumption"]["ts"], y: data["consumption"]["dl"]},
-      { name: "Upload", type: 'scatter',
-        x: data["consumption"]["ts"], y: data["consumption"]["ul"]
-      }
-    ];
-
-    con_layout = layout;
-    con_layout["yaxis"] = { title : { text: 'Bandwidth [Mbps]'},
-                            range : [0, 10]};
-
-    Plotly.newPlot('cons_plot', con_series, con_layout, config);
-
-    if (data['consumption']['ts']?.length > 0) {
+      await newPlot('dev_plot', dev_series, {
+        yaxis: {title: {text: '# of Devices'}},
+      })
+    },
+    async consumption (data) {
       // consumption stat requires hardware we're not currently rolling out
-      $('#cons_plot').parents('.row').first().collapse('show');
-    }
+      if (data.consumption.ts?.length == 0) return
 
-    // DEVICES
-      
-    var dev_series = [
-      { name: "Active", type: 'scatter',
-        x: data["devices"]["ts"], y: data["devices"]["active"]},
-      { name: "1-Day", type: 'scatter',
-        x: data["devices"]["ts"], y: data["devices"]["1d"]},
-      { name: "1-Week", type: 'scatter',
-        x: data["devices"]["ts"], y: data["devices"]["1w"]},
-      { name: "All Time", type: 'scatter',
-        x: data["devices"]["ts"], y: data["devices"]["tot"]}
-    ];
+      const con_series = [
+        { name: "Download", type: 'scatter',
+          x: data["consumption"]["ts"], y: data["consumption"]["dl"]},
+        { name: "Upload", type: 'scatter',
+          x: data["consumption"]["ts"], y: data["consumption"]["ul"]
+        }
+      ]
 
-    dev_layout = layout;
-    dev_layout["yaxis"] = { title : { text: '# of Devices'}};
+      await newPlot('cons_plot', con_series, {
+        yaxis: {title: {text: 'Bandwidth [Mbps]'}, range: [0, 10]},
+      })
 
-    Plotly.newPlot('dev_plot', dev_series, dev_layout, config);
-  },
-  entryTimestampToDate ([name, block]) {
+      $('#cons_plot').parents('.row').first().collapse('show')
+    },
+    async throughput (data) {
+      if (data.bw.ts === null) return
+      if (data.bw.dl === null && data.bw.ul === null) return
+
+      const bw_series = [
+        {
+          name: "Download",
+          type: 'scatter',
+          x: data["bw"]["ts"],
+          y: data["bw"]["dl"],
+        },
+        {
+          name: "Upload",
+          type: 'scatter',
+          x: data["bw"]["ts"],
+          y: data["bw"]["ul"],
+        },
+      ]
+
+      await newPlot('bw_plot', bw_series, {
+          yaxis: {title: {text: 'Throughput [Mbps]'}},
+      })
+
+      dataView.show('bw_plot_tog')
+    },
+    async latency (data) {
+      const columnCount = Object.values(data.latency).reduce(
+        (count, value) => count + (value === null ? 0 : 1),
+        0
+      )
+
+      if (data.latency.ts === null || columnCount < 2) return
+
+      const lat_series = [
+        {
+          name: "Google",
+          type: 'scatter',
+          x: data["latency"]["ts"],
+          y: data["latency"]["google"],
+        },
+        {
+          name: "Amazon",
+          type: 'scatter',
+          x: data["latency"]["ts"],
+          y: data["latency"]["amazon"],
+        },
+        {
+          name: "Wikipedia",
+          type: 'scatter',
+          x: data["latency"]["ts"],
+          y: data["latency"]["wikipedia"],
+        },
+      ]
+
+      await newPlot('latency_plot', lat_series, {
+        yaxis: {title: {text: 'Latency [ms]'}, range: [0, 75]}
+      })
+
+      dataView.show('latency_plot_tog')
+    },
+  }
+
+  function newPlot (name, series, layoutExtras) {
+      const layout = Object.assign({
+        autosize: true,
+        height: 300,
+        margin: {l: 70, r: 60, b: 50, t: 20, pad: 0},
+        font: {size : 18 },
+        showlegend: true,
+        legend: {"orientation": "v", "x" : 0.05, "y" : 0.95}
+      }, layoutExtras)
+
+      return Plotly.newPlot(name, series, layout, {displayModeBar: false})
+  }
+
+  function buildPlot (name, data) {
+    return plotBuilder[name](data)
+  }
+
+  function entryTimestampsToDates (block) {
     // convert timestamp -> Date to ensure formatting
     const fixed = Object.assign({}, block)
 
@@ -312,20 +336,31 @@ const ispPlots = {
       }
     }
 
-    return [name, fixed]
-  },
-  async load () {
-    const data = await $.getJSON('plots')
-    const fixedEntries = Object.entries(data).map(this.entryTimestampToDate)
-    const fixedData = Object.fromEntries(fixedEntries)
+    return fixed
+  }
 
-    this.makePlots(fixedData)
+  function ingest (data) {
+    const entries = Object.entries(data)
+    const fixed = entries.map(([name, block]) => [name, entryTimestampsToDates(block)])
+    return Object.fromEntries(fixed)
+  }
 
-    dataView.elementToggle.initDeferred('plots')
-
-    return fixedData
-  },
-}
+  return {
+    async loadPlot (name) {
+      const apiData = await $.getJSON(`plots/${name}`)
+      const plotData = ingest(apiData)
+      await buildPlot(name, plotData)
+      dataView.elementToggle.initDeferred(`plots-${name}`)
+      return plotData
+    },
+    load () {
+      return Promise.all([
+        this.loadPlot('throughput'),
+        this.loadPlot('latency'),
+      ])
+    }
+  }
+})()
 
 
 const networkStats = {
