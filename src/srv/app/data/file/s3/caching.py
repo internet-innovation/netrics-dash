@@ -4,6 +4,7 @@ import enum
 import io
 import sys
 from collections.abc import Iterable
+from functools import cached_property
 from typing import Self, Generator
 
 import s3path
@@ -22,7 +23,7 @@ except AttributeError:
 S3Key = str | s3path.S3Path
 
 
-class S3CacheDB(enum.IntEnum):
+class S3CacheNS(enum.IntEnum):
 
     LIST = 0
     GET = 1
@@ -30,23 +31,30 @@ class S3CacheDB(enum.IntEnum):
 
 class ValKeyCache(SimpleCache):
 
-    _db_: S3CacheDB = abstractmember()
+    ns: S3CacheNS = abstractmember()
 
     def __init__(self, url: str) -> None:
         super().__init__()
-        self._client_ = valkey.from_url(url, db=self._db_.value, decode_responses=True)
+        self._client_ = valkey.from_url(url, decode_responses=True)
+
+    @cached_property
+    def db(self) -> int | None:
+        return self._client_.get_connection_kwargs().get('db')
+
+    def _nskey_(self, key: S3Key) -> str:
+        return f'{self.ns}:{key}' if self.db is None else str(key)
 
     def discard(self, key: S3Key) -> None:
-        self._client_.delete(str(key))
+        self._client_.delete(self._nskey_(key))
 
 
 class S3ListCacheValKey(ValKeyCache):
 
-    _db_ = S3CacheDB.LIST
-    _ttl = datetime.timedelta(hours=2)
+    ns = S3CacheNS.LIST
+    ttl = datetime.timedelta(hours=2)
 
     def get(self, key: S3Key) -> set[CachingS3Path] | None:
-        cached = self._client_.smembers(str(key))
+        cached = self._client_.smembers(self._nskey_(key))
 
         if cached:
             self.hits += 1
@@ -56,25 +64,26 @@ class S3ListCacheValKey(ValKeyCache):
             return None
 
     def set(self, key: S3Key, values: Iterable[S3Key]) -> bool:
+        nskey = self._nskey_(key)
         prepped = [str(value) for value in values] or ['']
         (count, _expire) = (
             self._client_.pipeline(transaction=True)
-            .sadd(str(key), *prepped)
-            .expire(str(key), self._ttl)
+            .sadd(nskey, *prepped)
+            .expire(nskey, self.ttl)
         ).execute()
         return bool(count)
 
 
 class S3GetCacheValKey(ValKeyCache):
 
-    _db_ = S3CacheDB.GET
-    _ttl = datetime.timedelta(weeks=2)
+    ns = S3CacheNS.GET
+    ttl = datetime.timedelta(weeks=2)
 
     def get(self, key: S3Key, decode=True) -> io.StringIO | None:
         if not decode:
             raise NotImplementedError("bytes not supported")
 
-        value = self._client_.getex(str(key), ex=self._ttl)
+        value = self._client_.getex(self._nskey_(key), ex=self.ttl)
 
         if value is None:
             self.misses += 1
@@ -84,7 +93,7 @@ class S3GetCacheValKey(ValKeyCache):
             return io.StringIO(value)
 
     def set(self, key: S3Key, value: str | bytes) -> bool:
-        return self._client_.set(str(key), value, ex=self._ttl)
+        return self._client_.set(self._nskey_(key), value, ex=self.ttl)
 
 
 match conf.DATAFILE_S3_CACHE_BACKEND:
