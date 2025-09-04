@@ -20,6 +20,7 @@ p + p {
 }
 
 footer {
+  margin: 2em 0 1em;
   padding: 20px;
 }
 
@@ -29,6 +30,12 @@ footer > p {
   margin: 5px;
   padding: 5px 0;
   text-align: center;
+}
+
+@media all and (min-width: 992px) {
+  footer {
+    margin-top: 4em;
+  }
 }
 
 ul.dropdown-menu>li {
@@ -97,11 +104,21 @@ ul.dropdown-menu>li {
 }
 
 .dashboard {
-  padding-top: 35px;
+  padding-top: 16px;
 }
 
 .dashrow {
-  padding-bottom: 35px;
+  padding-bottom: 16px;
+}
+
+@media all and (min-width: 992px) {
+  .dashboard {
+    padding-top: 35px;
+  }
+
+  .dashrow {
+    padding-bottom: 35px;
+  }
 }
 
 .dashval {
