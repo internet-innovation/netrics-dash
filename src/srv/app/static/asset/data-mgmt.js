@@ -309,8 +309,9 @@ const ispPlots = (function () {
       const layout = Object.assign({
         autosize: true,
         height: 300,
-        margin: {l: 70, r: 60, b: 50, t: 20, pad: 0},
-        font: {size : 18 },
+        margin: {l: 70, r: 60, b: 50, t: 20},
+        xaxis: {automargin: true},
+        font: {size: 18},
         showlegend: true,
         legend: {"orientation": "v", "x" : 0.05, "y" : 0.95}
       }, layoutExtras)
