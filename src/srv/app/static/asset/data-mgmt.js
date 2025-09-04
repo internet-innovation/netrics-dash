@@ -119,7 +119,9 @@ const ispStats = (() => {
     else if (data["ookla_dl"] < 25) dataView.setColorClass(pardiv, "bad");
     else                            dataView.setColorClass(pardiv, "ok");
 
-    document.getElementById("bw_slash").innerHTML = ooklaReceived(data) ? "/" : "&mdash;"
+    if (data["ookla_dl"] >= 100 && data["ookla_ul"] >= 100) pardiv.classList.add('dashval-long');
+
+    pardiv.classList.add('dashval-loaded');
 
     document.getElementById("text_ookla_dl").innerHTML = cleanNumber(data["ookla_dl"])
     document.getElementById("text_ookla_ul").innerHTML = cleanNumber(data["ookla_ul"])
