@@ -1,7 +1,7 @@
-For participants in the University of Chicago Internet Equity study, the Home Network Speed Test browser extension is your window to your study data.
+For participants in the University of Chicago Internet Innovation study, the Home Network Speed Test browser extension is your window to your study data.
 
 This extension runs automatic speed tests to collect vital data concerning the real-world performance of your home network.
 
 And, with a click of the extension's browser toolbar icon, you are encouraged to review all your study data, run your own network speed tests, and share how well your network is performing for you.
 
-Please note: This extension is intended for use by participants in the Internet Access & Equity Initiative study, administered by the Center for Data and Computing at the University of Chicago. A Network Measurement Device must be installed on the network to which your computer is connected.
+Please note: This extension is intended for use by participants in the Internet Innovation Initiative study, administered by the Department of Computer Science and Crown School at the University of Chicago. A Network Measurement Device must be installed on the network to which your computer is connected.
